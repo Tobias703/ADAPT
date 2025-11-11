@@ -1,122 +1,75 @@
-use anyhow::Result;
-use clap::Parser;
 use tokio::net::{TcpListener, TcpStream};
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
-use tracing::{info, warn, error};
-
-/// Minimal PT server: accepts obfuscated connections and proxies them to a backend (Tor ORPort).
-#[derive(Parser, Debug)]
-#[command(author, version, about)]
-struct Opt {
-    /// Listen address for obfuscated transports (e.g. 0.0.0.0:443)
-    #[arg(long, default_value = "127.0.0.1:1984")]
-    listen: String,
-
-    /// Backend Tor bridge address (ORPort) or local Tor instance (e.g. 127.0.0.1:9001)
-    #[arg(long, default_value = "127.0.0.1:9001")]
-    backend: String,
-}
+use std::env;
+use std::sync::Arc;
 
 #[tokio::main]
-async fn main() -> Result<()> {
-    // init logging (respect RUST_LOG env var)
-    tracing_subscriber::fmt()
-        .with_env_filter(tracing_subscriber::EnvFilter::from_default_env())
-        .init();
+async fn main() -> anyhow::Result<()> {
+    // simple CLI: first arg is bind addr (default 0.0.0.0:3030), second optional "obf" enables XOR obf
+    let mut args = env::args().skip(1);
+    let bind = args.next().unwrap_or_else(|| "0.0.0.0:3030".into());
+    let use_obf = args.next().map(|s| s == "obf").unwrap_or(false);
 
-    let opt = Opt::parse();
+    let key = Arc::new(b"devkey".to_vec()); // simple XOR key (example only)
+    println!("PT server listening on {}, obf={}", bind, use_obf);
 
-    let listener = TcpListener::bind(&opt.listen).await?;
-    info!("pt-server listening on {}", opt.listen);
-    info!("proxying connections to backend {}", opt.backend);
-
+    let listener = TcpListener::bind(bind).await?;
     loop {
-        match listener.accept().await {
-            Ok((socket, peer)) => {
-                let backend = opt.backend.clone();
-                info!("accepted connection from {}", peer);
-                tokio::spawn(async move {
-                    if let Err(e) = handle_conn(socket, &backend).await {
-                        warn!("connection handler error from {}: {:?}", peer, e);
-                    }
-                });
+        let (sock, peer) = listener.accept().await?;
+        let key = key.clone();
+        tokio::spawn(async move {
+            if let Err(e) = handle_connection(sock, peer.to_string(), use_obf, key).await {
+                eprintln!("Connection {} error: {}", peer, e);
             }
-            Err(e) => {
-                error!("accept error: {:?}", e);
-            }
-        }
+        });
     }
 }
 
-/// Per-connection handler: perform optional server-side handshake/transform and proxy to backend
-async fn handle_conn(mut inbound: TcpStream, backend_addr: &str) -> Result<()> {
-    // Optionally implement a server-side handshake with the client here.
-    // For example: read initial bytes, validate authentication token, etc.
-    //
-    // We'll skip that here and move straight to backend connection.
+async fn handle_connection(mut sock: TcpStream, peer: String, use_obf: bool, key: std::sync::Arc<Vec<u8>>) -> anyhow::Result<()> {
+    println!("Accepted connection from {}", peer);
 
-    let mut outbound = TcpStream::connect(backend_addr).await?;
-    // now do full-duplex proxy with transform hooks
-    proxy_apply_transforms(&mut inbound, &mut outbound).await?;
+    // We'll loop: read messages from client and reply.
+    loop {
+        let msg = match read_msg(&mut sock).await {
+            Ok(m) => m,
+            Err(e) => {
+                println!("{}: read_msg EOF or error: {}", peer, e);
+                return Ok(());
+            }
+        };
+
+        let payload = if use_obf { xor_bytes(&msg, &key) } else { msg };
+
+        // Print as UTF-8 if possible
+        match std::str::from_utf8(&payload) {
+            Ok(s) => println!("{} -> received: {}", peer, s),
+            Err(_) => println!("{} -> received ({} bytes, non-utf8)", peer, payload.len()),
+        }
+
+        // Reply
+        let reply_text = format!("ack: received {} bytes", payload.len());
+        let reply_bytes = if use_obf { xor_bytes(reply_text.as_bytes(), &key) } else { reply_text.into_bytes() };
+        write_msg(&mut sock, &reply_bytes).await?;
+    }
+}
+
+async fn read_msg(sock: &mut TcpStream) -> anyhow::Result<Vec<u8>> {
+    // 4-byte big-endian length prefix
+    let mut lenb = [0u8; 4];
+    sock.read_exact(&mut lenb).await?;
+    let len = u32::from_be_bytes(lenb) as usize;
+    let mut buf = vec![0u8; len];
+    sock.read_exact(&mut buf).await?;
+    Ok(buf)
+}
+
+async fn write_msg(sock: &mut TcpStream, payload: &[u8]) -> anyhow::Result<()> {
+    let len = (payload.len() as u32).to_be_bytes();
+    sock.write_all(&len).await?;
+    sock.write_all(payload).await?;
     Ok(())
 }
 
-/// Core proxy loop: reads from `a` and writes to `b`, and vice-versa.
-/// Applies transform (deobfuscation/obfuscation) hooks to the data passing through.
-async fn proxy_apply_transforms(a: &mut TcpStream, b: &mut TcpStream) -> Result<()> {
-    // split both streams to operate concurrently.
-    let (mut ar, mut aw) = a.split();
-    let (mut br, mut bw) = b.split();
-
-    // client -> backend task (deobfuscate incoming data and write plaintext to backend)
-    let c_to_s = async {
-        let mut buf = [0u8; 16 * 1024];
-        loop {
-            let n = ar.read(&mut buf).await?;
-            if n == 0 {
-                // EOF from client
-                bw.shutdown().await.ok();
-                break;
-            }
-            // server-side: transform incoming (obfuscated) bytes into underlying Tor bytes
-            let plain = transform_incoming(&buf[..n]).await?;
-            bw.write_all(&plain).await?;
-        }
-        Ok::<(), anyhow::Error>(())
-    };
-
-    // backend -> client task (obfuscate backend bytes before sending back)
-    let s_to_c = async {
-        let mut buf = [0u8; 16 * 1024];
-        loop {
-            let n = br.read(&mut buf).await?;
-            if n == 0 {
-                // EOF from backend
-                aw.shutdown().await.ok();
-                break;
-            }
-            // server-side: transform outgoing (plain Tor bytes) into obfuscated bytes
-            let obf = transform_outgoing(&buf[..n]).await?;
-            aw.write_all(&obf).await?;
-        }
-        Ok::<(), anyhow::Error>(())
-    };
-
-    // run both directions concurrently and return when both finish or any errors occur
-    tokio::try_join!(c_to_s, s_to_c)?;
-    Ok(())
-}
-
-/// Transform data arriving from client (obfuscated -> plain)
-/// TODO: replace identity with your de-obfuscation logic (framing, decryption, etc).
-async fn transform_incoming(data: &[u8]) -> Result<Vec<u8>> {
-    // identity (no-op)
-    Ok(data.to_vec())
-}
-
-/// Transform data going to client (plain -> obfuscated)
-/// TODO: replace identity with your obfuscation logic (framing, encryption, mimicry).
-async fn transform_outgoing(data: &[u8]) -> Result<Vec<u8>> {
-    // identity (no-op)
-    Ok(data.to_vec())
+fn xor_bytes(data: &[u8], key: &Vec<u8>) -> Vec<u8> {
+    data.iter().enumerate().map(|(i, b)| b ^ key[i % key.len()]).collect()
 }
