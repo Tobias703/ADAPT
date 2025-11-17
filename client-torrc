@@ -1,0 +1,11 @@
+DataDirectory /tmp/ptclient
+
+# Use the PT
+UseBridges 1
+ClientTransportPlugin foobar exec ./target/debug/pt
+Bridge foobar 127.0.0.1:1234
+
+#Port for Connection
+SocksPort 9052
+
+# Log debug file /tmp/tor-client-debug.log

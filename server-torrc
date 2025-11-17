@@ -1,0 +1,19 @@
+# Disable Bridge IP Distribution
+PublishServerDescriptor 0
+# BridgeDistribution none
+
+# Define as Bridge with PT
+ServerTransportPlugin foobar exec ./target/debug/pt
+ServerTransportListenAddr foobar 127.0.0.1:1234
+BridgeRelay 1
+
+# Port Config, disabled SocksPort so bridge can't be used as Client
+ORPort 127.0.0.1:9050
+ExtORPort 127.0.0.1:9051
+SocksPort 0
+
+# Prevent Connection to non-relays
+ExitPolicy reject *:*
+ExitPolicy reject6 *:*
+
+# Log debug file /tmp/tor-server-debug.log

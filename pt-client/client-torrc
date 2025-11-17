@@ -1,8 +1,0 @@
-Nickname ptclient
-DataDirectory /tmp/ptclient
-
-UseBridges 1
-Bridge pt 127.0.0.1:3030
-ClientTransportPlugin pt exec ./target/debug/pt-client
-
-SocksPort 127.0.0.1:9052
