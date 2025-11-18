@@ -1,0 +1,26 @@
+services:
+  pt-server:
+    build: .
+    container_name: pt-server
+    # command: tor -f /rustTransport/docker-server-torrc
+    volumes:
+      - ./:/rustTransport
+    # networks:
+    #   - tornet
+    # ports:
+      # - "9001:9001"   # PT listening port
+
+  pt-client:
+    build: .
+    container_name: pt-client
+    # command: tor -f /rustTransport/docker-client-torrc
+    volumes:
+      - ./:/rustTransport
+    # networks:
+    #   - tornet
+    ports:
+      - "9052:9052"   # PT listening port
+
+# networks:
+#   tornet:
+#     driver: bridge
