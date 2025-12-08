@@ -202,7 +202,7 @@ fn server(mut server: onion_peel::Server) {
                 server_bind(bind_addr, transport.clone(), relay_dialer.clone());
 
                 // Tell tor that the transport has been successfully initialized
-                transport.report_success("127.0.0.1:1234".parse().unwrap(), None);
+                transport.report_success("0.0.0.0:1234".parse().unwrap(), None);
                 // Or that the transport has failed to initialize
                 // server.report_failure(transport_name, "Could not initialize transport forwarder because foobar")
             }
