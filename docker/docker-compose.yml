@@ -4,32 +4,19 @@ services:
       context: ../
       dockerfile: docker/server/Dockerfile
     container_name: pt-server
-    # command: tor -f /rustTransport/docker-server-torrc
-    # volumes:
-    #   - ./:/rustTransport
     networks:
-      tornet:
-        ipv4_address: 172.21.0.10
-    # ports:
-      # - "9001:9001"   # PT listening port
+        - tornet
 
   pt-client:
     build:
       context: ../
       dockerfile: docker/client/Dockerfile
     container_name: pt-client
-    # command: tor -f /rustTransport/docker-client-torrc
-    # volumes:
-    #   - ./:/rustTransport
     networks:
-      tornet:
-        ipv4_address: 172.21.0.11
+      - tornet
     ports:
-      - "9052:9052"   # PT listening port
+      - "9052:9052"
 
 networks:
   tornet:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.21.0.0/24
