@@ -1,0 +1,23 @@
+FROM rust:latest AS builder
+WORKDIR /build
+COPY ../../ .
+RUN cargo build --release
+
+FROM archlinux:latest
+
+# Install tor
+RUN pacman -Sy --noconfirm tor && pacman -Scc --noconfirm
+
+# Create non-root user for tor
+RUN useradd -m toruser
+USER toruser
+
+WORKDIR /app
+
+# Copy torrc + PT binary
+COPY docker/client/torrc /app/torrc
+COPY --from=builder /build/target/release/pt /usr/local/bin/pt
+
+# Entrypoint handles the Tor invocation
+COPY docker/client/entrypoint.sh /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]

@@ -4,11 +4,11 @@ DataDirectory /tmp/ptclient # A place to save our fancy data
 
 # Use the PT
 UseBridges 1 # Yes, we want to use a bridge
-ClientTransportPlugin foobar exec ./target/debug/pt # Name of the transport and path to the transport binary
-Bridge foobar 172.19.0.2:1234 # This speaks the custom protocol, sits inbetween pt client and server binaries
+ClientTransportPlugin foobar exec /usr/local/bin/pt # Name of the transport and path to the transport binary
+Bridge foobar 172.21.0.10:1234 # This speaks the custom protocol, sits inbetween pt client and server binaries
 
 #Port for Connection
-SocksPort 9052 # The tor client uses this to connect to the pt client
+SocksPort 0.0.0.0:9052 # The tor client uses this to connect to the pt client
 
 # Disable Conflux (effectively just removes the "just one bridge" warning)
 ConfluxEnabled 0
