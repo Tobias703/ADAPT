@@ -12,7 +12,7 @@ ServerTransportListenAddr foobar 0.0.0.0:1234 # This speaks the custom protocol,
 BridgeRelay 1 # Yes, we are a bridge
 
 # Set up Networking
-Address pt-server # Hello, I'm the pt-server
+Address 172.21.0.10 # Hello, I'm the pt-server
 ORPort 9050 # Onion Routing port, negotiates with pt server binary
 ExtORPort 9051 # Extended Onion routing, control channel to talk to pt server binary
 SocksPort 0 # Disable SocksPort as this should not be used as a non-pt bridge

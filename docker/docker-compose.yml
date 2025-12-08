@@ -5,7 +5,8 @@ services:
       dockerfile: docker/server/Dockerfile
     container_name: pt-server
     networks:
-        - tornet
+      tornet:
+        ipv4_address: 172.21.0.10
 
   pt-client:
     build:
@@ -13,10 +14,14 @@ services:
       dockerfile: docker/client/Dockerfile
     container_name: pt-client
     networks:
-      - tornet
+      tornet:
+        ipv4_address: 172.21.0.11
     ports:
       - "9052:9052"
 
 networks:
   tornet:
     driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/24
