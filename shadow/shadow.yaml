@@ -1,0 +1,88 @@
+general:
+  stop_time: 3m
+
+network:
+  graph:
+    type: gml
+    file: 
+      path: ./topology.gml
+
+hosts:
+  4uthority:
+    network_node_id: 1
+    ip_addr: 100.0.0.1
+    processes:
+    - path: tor
+      args: --Address 4uthority --Nickname 4uthority
+            --defaults-torrc torrc-defaults -f torrc
+      start_time: 1
+      expected_final_state: running
+  exit1:
+    network_node_id: 1
+    processes:
+    - path: tor
+      args: --Address exit1 --Nickname exit1
+            --defaults-torrc torrc-defaults -f torrc
+      start_time: 60
+      expected_final_state: running
+  exit2:
+    network_node_id: 1
+    processes:
+    - path: tor
+      args: --Address exit2 --Nickname exit2
+            --defaults-torrc torrc-defaults -f torrc
+      start_time: 60
+      expected_final_state: running
+  relay1:
+    network_node_id: 1
+    processes:
+    - path: tor
+      args: --Address relay1 --Nickname relay1
+            --defaults-torrc torrc-defaults -f torrc
+      start_time: 60
+      expected_final_state: running
+  relay2:
+    network_node_id: 1
+    processes:
+    - path: tor
+      args: --Address relay2 --Nickname relay2
+            --defaults-torrc torrc-defaults -f torrc
+      start_time: 60
+      expected_final_state: running
+  relay3:
+    network_node_id: 1
+    processes:
+    - path: tor
+      args: --Address relay3 --Nickname relay3
+            --defaults-torrc torrc-defaults -f torrc
+      start_time: 60
+      expected_final_state: running
+  relay4:
+    network_node_id: 1
+    processes:
+    - path: tor
+      args: --Address relay4 --Nickname relay4
+            --defaults-torrc torrc-defaults -f torrc
+      start_time: 60
+      expected_final_state: running
+
+  client:
+    network_node_id: 0
+    processes:
+      - path: /bin/bash
+        args: -c "pwd"
+        start_time: 5s
+        expected_final_state: {exited: 0}
+  #   - path: /usr/bin/tor
+  #     args: -f torrc.client
+  #     start_time: 30s
+  #   - path: /bin/bash
+  #     args: test.sh
+  #     start_time: 120s
+
+  # target:
+  #   network_node_id: 2
+  #   processes:
+  #     - path: /usr/bin/python3
+  #       args: -m http.server 8080
+  #       start_time: 5s
