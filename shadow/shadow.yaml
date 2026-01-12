@@ -1,5 +1,5 @@
 general:
-  stop_time: 30m
+  stop_time: 10m
 
 network:
   graph:
@@ -8,8 +8,9 @@ network:
       path: ./topology.gml
 
 hosts:
+  # Tor Network
   4uthority:
-    network_node_id: 1
+    network_node_id: 2
     ip_addr: 100.0.0.1
     processes:
     - path: tor
@@ -18,75 +19,98 @@ hosts:
       start_time: 1s
       expected_final_state: running
   exit1:
-    network_node_id: 1
+    network_node_id: 2
     processes:
     - path: tor
       args: --Address exit1 --Nickname exit1
             --defaults-torrc torrc-defaults -f torrc
-      start_time: 60s
+      start_time: 1m
       expected_final_state: running
   exit2:
-    network_node_id: 1
+    network_node_id: 2
     processes:
     - path: tor
       args: --Address exit2 --Nickname exit2
             --defaults-torrc torrc-defaults -f torrc
-      start_time: 60s
+      start_time: 1m
       expected_final_state: running
   relay1:
-    network_node_id: 1
+    network_node_id: 2
     processes:
     - path: tor
       args: --Address relay1 --Nickname relay1
             --defaults-torrc torrc-defaults -f torrc
-      start_time: 60s
+      start_time: 1m
       expected_final_state: running
   relay2:
-    network_node_id: 1
+    network_node_id: 2
     processes:
     - path: tor
       args: --Address relay2 --Nickname relay2
             --defaults-torrc torrc-defaults -f torrc
-      start_time: 60s
+      start_time: 1m
       expected_final_state: running
   relay3:
-    network_node_id: 1
+    network_node_id: 2
     processes:
     - path: tor
       args: --Address relay3 --Nickname relay3
             --defaults-torrc torrc-defaults -f torrc
-      start_time: 60s
+      start_time: 1m
       expected_final_state: running
   relay4:
-    network_node_id: 1
+    network_node_id: 2
     processes:
     - path: tor
       args: --Address relay4 --Nickname relay4
             --defaults-torrc torrc-defaults -f torrc
-      start_time: 60s
+      start_time: 1m
       expected_final_state: running
 
+  # pt-server as bridge into Tor Network
   bridge:
     ip_addr: 100.0.0.3
     network_node_id: 1
     processes:
       - path: /usr/bin/tor
         args: --Address bridge --Nickname bridge --defaults-torrc torrc-defaults -f torrc
-        start_time: 60s
+        start_time: 1m
         expected_final_state: running
 
+  # pt-client inside censored Network
   client:
     ip_addr: 100.0.0.2
     network_node_id: 0
     processes:
-    - path: /usr/bin/tor
+    - path: /usr/bin/tor # tor via pt
       args: --Address client --Nickname client --defaults-torrc torrc-defaults -f torrc
+      environment:
+        RUST_BACKTRACE: "1"
+      start_time: 2m
+      expected_final_state: running
+    - path: /usr/bin/tor # raw tor
+      args: --Address clientnopt --Nickname clientnopt --defaults-torrc torrc-defaults -f torrc-nopt
+      start_time: 2m
+      expected_final_state: running
+    - path: /usr/bin/curl # curl via pt
+      args: ["--socks5-hostname", "127.0.0.1:9052", "tinbkh6cadabugehfqjqydkd74heoifq2x4q2my44a5oi4546f4oklqd.onion"]
+      start_time: 7m
+    - path: /usr/bin/curl # direct curl
+      args: ["http://91.54.55.87:8080"]
       start_time: 180s
       expected_final_state: running
-
-  # target:
-  #   network_node_id: 2
-  #   processes:
-  #     - path: /usr/bin/python3
-  #       args: -m http.server 8080
-  #       start_time: 5s
+  
+  # Target resource, unreachable directly from client
+  target:
+    ip_addr: 91.54.55.87
+    network_node_id: 2
+    processes:
+    - path: /usr/bin/python3
+      args: -m http.server 8080
+      start_time: 5s
+      expected_final_state: running
+    - path: /usr/bin/tor # tor hidden service
+      args: --defaults-torrc torrc-defaults -f torrc
+      start_time: 5m
+      expected_final_state: running
+    

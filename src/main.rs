@@ -126,56 +126,69 @@ fn client_bind(addr: net::SocketAddr) {
 
             match net::TcpStream::connect(remote_addr) {
                 Ok(remote_stream) => {
-                    // Set a timeout for the remote end as well
-                    remote_stream
-                        .set_read_timeout(Some(time::Duration::from_secs(5)))
-                        .unwrap();
-                    remote_stream
-                        .set_write_timeout(Some(time::Duration::from_secs(5)))
-                        .unwrap();
-                    // If successful, tell the client to expect data to start being relayed
-                    let ready_conn = conn.report_success().unwrap();
+                    let _ = remote_stream.set_read_timeout(Some(time::Duration::from_secs(5)));
+                    let _ = remote_stream.set_write_timeout(Some(time::Duration::from_secs(5)));
 
-                    // Start relaying data between the two streams
-                    // by spawning 2 threads to continuously copy on both directions.
-                    // This is not very efficient, but good enough for a demo.
-                    // We need to clone the stream here because both the reading and writing threads need a mutable handle
+                    let ready_conn = match conn.report_success() {
+                        Ok(c) => c,
+                        Err(_) => return,
+                    };
+
                     let mut client_stream_1 = ready_conn.get_stream();
-                    let mut client_stream_2 = client_stream_1.try_clone().unwrap();
+                    let mut client_stream_2 = match client_stream_1.try_clone() {
+                        Ok(s) => s,
+                        Err(_) => return,
+                    };
                     let mut server_stream_1 = remote_stream;
-                    let mut server_stream_2 = server_stream_1.try_clone().unwrap();
+                    let mut server_stream_2 = match server_stream_1.try_clone() {
+                        Ok(s) => s,
+                        Err(_) => return,
+                    };
+
                     // Client => Server
                     thread::spawn(move || {
-                        // Encode each byte
                         let mut buf: [u8; 1] = [0];
                         let mut result_buf: [u8; 24];
                         loop {
-                            client_stream_1.read_exact(&mut buf).unwrap();
+                            if client_stream_1.read_exact(&mut buf).is_err() {
+                                break;
+                            }
                             result_buf = encode(buf[0]);
-                            server_stream_1.write_all(&result_buf).unwrap();
+                            if server_stream_1.write_all(&result_buf).is_err() {
+                                break;
+                            }
                         }
                     });
+
+                    // Server => Client
                     thread::spawn(move || {
-                        // Decode each byte
                         let mut buf: [u8; 24] = [0; 24];
                         let mut result_buf: [u8; 1] = [0];
                         loop {
-                            server_stream_2.read_exact(&mut buf).unwrap();
+                            if server_stream_2.read_exact(&mut buf).is_err() {
+                                break;
+                            }
                             result_buf[0] = decode(buf);
-                            client_stream_2.write_all(&result_buf).unwrap();
+                            if client_stream_2.write_all(&result_buf).is_err() {
+                                break;
+                            }
                         }
                     });
                 }
-                // If that fails, tell the client
-                // Note that in a real-world program you should look at the error closely
-                // and invoke the most appropriate error reporting method.
-                Err(err) => match err.kind() {
-                    io::ErrorKind::ConnectionRefused => conn.report_connection_refused().unwrap(),
-                    io::ErrorKind::NotFound => conn.report_destination_unreachable().unwrap(),
-                    io::ErrorKind::UnexpectedEof => conn.report_destination_unreachable().unwrap(),
-                    _ => conn.report_destination_unreachable().unwrap(),
-                },
-            };
+                Err(err) => {
+                    match err.kind() {
+                        io::ErrorKind::ConnectionRefused => {
+                            let _ = conn.report_connection_refused();
+                        }
+                        io::ErrorKind::NotFound | io::ErrorKind::UnexpectedEof => {
+                            let _ = conn.report_destination_unreachable();
+                        }
+                        _ => {
+                            let _ = conn.report_destination_unreachable();
+                        }
+                    }
+                }
+            }
         }
     });
 }

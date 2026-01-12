@@ -1,0 +1,6 @@
+RunAsDaemon 0
+DataDirectory datadir
+
+SocksPort 9050
+
+UseBridges 0
