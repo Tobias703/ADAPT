@@ -17,12 +17,6 @@ graph [
         host_bandwidth_down "100 Mbit"
         host_bandwidth_up "100 Mbit"
     ]
-    node [
-        id 3
-        label "target"
-        host_bandwidth_down "100 Mbit"
-        host_bandwidth_up "100 Mbit"
-    ]
 
     edge [
         source 0
@@ -36,22 +30,10 @@ graph [
         latency "10 ms"
         packet_loss 0.0
     ]
-    edge [
-        source 2
-        target 3
-        latency "10 ms"
-        packet_loss 0.0
-    ]
 
     edge [
         source 0
         target 2
-        latency "1 ms"
-        packet_loss 1.0
-    ]
-    edge [
-        source 0
-        target 3
         latency "1 ms"
         packet_loss 1.0
     ]
@@ -71,12 +53,6 @@ graph [
     edge [
         source 2
         target 2
-        latency "10 ms"
-        packet_loss 0.0
-    ]
-    edge [
-        source 3
-        target 3
         latency "10 ms"
         packet_loss 0.0
     ]
