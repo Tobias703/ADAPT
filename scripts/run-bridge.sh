@@ -2,4 +2,4 @@
 cd "../$(dirname "$0")"
 clear
 cargo build
-tor -f src/server-torrc
+tor -f src/bridge-torrc

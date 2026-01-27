@@ -5,7 +5,7 @@ DataDirectory /tmp/ptclient # A place to save our fancy data
 # Use the PT
 UseBridges 1 # Yes, we want to use a bridge
 ClientTransportPlugin foobar exec ./target/debug/pt # Name of the transport and path to the transport binary
-Bridge foobar 127.0.0.1:1234 # This speaks the custom protocol, sits inbetween pt client and server binaries
+Bridge foobar 127.0.0.1:1234 # This speaks the custom protocol, sits inbetween pt client and bridge binaries
 
 #Port for Connection
 SocksPort 9052 # The tor client uses this to connect to the pt client

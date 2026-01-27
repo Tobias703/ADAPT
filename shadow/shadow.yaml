@@ -6,6 +6,8 @@ network:
     type: gml
     file: 
       path: ./topology.gml
+host_option_defaults:
+  pcap_enabled: true
 
 hosts:
   # Tor Network
@@ -86,11 +88,11 @@ hosts:
       args: ["--socks5-hostname", "127.0.0.1:9052", "tinbkh6cadabugehfqjqydkd74heoifq2x4q2my44a5oi4546f4oklqd.onion"]
       start_time: 7m
     - path: /usr/bin/curl # direct curl
-      args: ["http://91.54.55.87:8080"]
+      args: ["http://100.0.0.4:8080"]
       start_time: 180s
       expected_final_state: running
 
-  # pt-server as bridge into Tor Network
+  # pt-bridge as bridge into Tor Network
   bridge:
     ip_addr: 100.0.0.3
     network_node_id: 1
@@ -102,7 +104,7 @@ hosts:
   
   # Target resource, unreachable directly from client
   target:
-    ip_addr: 91.54.55.87
+    ip_addr: 100.0.0.4
     network_node_id: 2
     processes:
     - path: /usr/bin/python3

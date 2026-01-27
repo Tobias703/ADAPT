@@ -1,6 +1,6 @@
-# The "pt server" refers to the instance of tor defined here; the "pt server binary" refers to the rust binary that actually runs the pt
+# The "pt bridge" refers to the instance of tor defined here; the "pt bridge binary" refers to the rust binary that actually runs the pt
 
-DataDirectory ./ptserver # A place to save our fancy data
+DataDirectory ./ptbridge # A place to save our fancy data
 
 # Disable Bridge IP Distribution
 PublishServerDescriptor 0 # We do not publish our server descriptor
@@ -8,18 +8,17 @@ BridgeDistribution none # Neither do we distribute our bridge contact info
 
 # Define as Bridge, using a pt
 ServerTransportPlugin obfs4 exec ../../../lyrebird # Name of the transport and path to the transport binary
-ServerTransportListenAddr obfs4 100.0.0.3:1234 # This speaks the custom protocol, sits inbetween pt server and client binaries
+ServerTransportListenAddr obfs4 100.0.0.3:1234 # This speaks the custom protocol, sits inbetween pt bridge and client binaries
 BridgeRelay 1 # Yes, we are a bridge
 
 # Set up Networking
-Address 100.0.0.3 # Hello, I'm the pt-server
-ORPort 9111 IPv4Only
+Address 100.0.0.3 # Hello, I'm the pt-bridge
+ORPort 9111 IPv4Only # Onion Routing port, negotiates with pt bridge binary
 DirPort 9112
-# Onion Routing port, negotiates with pt server binary
-ExtORPort 100.0.0.3:9051 # Extended Onion routing, control channel to talk to pt server binary
+ExtORPort 100.0.0.3:9051 # Extended Onion routing, control channel to talk to pt bridge binary
 SocksPort 0 # Disable SocksPort as this should not be used as a non-pt bridge
 
 # Contact info so Tor does not complain
 ContactInfo anonymous nobody@example.invalid # Put your contact info here if you are planning to run in production
 
-# Log debug file ./tor-server-debug.log
+Log debug file ./tor-bridge-debug.log

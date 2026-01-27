@@ -1,6 +1,6 @@
-# The "pt server" refers to the instance of tor defined here; the "pt server binary" refers to the rust binary that actually runs the pt
+# The "pt bridge" refers to the instance of tor defined here; the "pt bridge binary" refers to the rust binary that actually runs the pt
 
-DataDirectory /tmp/ptserver # A place to save our fancy data
+DataDirectory /tmp/ptbridge # A place to save our fancy data
 
 # Disable Bridge IP Distribution
 PublishServerDescriptor 0 # We do not publish our server descriptor
@@ -8,16 +8,16 @@ BridgeDistribution none # Neither do we distribute our bridge contact info
 
 # Define as Bridge, using a pt
 ServerTransportPlugin foobar exec ./target/debug/pt # Name of the transport and path to the transport binary
-ServerTransportListenAddr foobar 127.0.0.1:1234 # This speaks the custom protocol, sits inbetween pt server and client binaries
+ServerTransportListenAddr foobar 127.0.0.1:1234 # This speaks the custom protocol, sits inbetween pt bridge and client binaries
 BridgeRelay 1 # Yes, we are a bridge
 
 # Set up Networking
 Address 127.0.0.1 # No, I do not need my public IP (removes IP mismatch warning)
-ORPort 127.0.0.1:9050 # Onion Routing port, negotiates with pt server binary
-ExtORPort 127.0.0.1:9051 # Extended Onion routing, control channel to talk to pt server binary
+ORPort 127.0.0.1:9050 # Onion Routing port, negotiates with pt bridge binary
+ExtORPort 127.0.0.1:9051 # Extended Onion routing, control channel to talk to pt bridge binary
 SocksPort 0 # Disable SocksPort as this should not be used as a non-pt bridge
 
 # Contact info so Tor does not complain
 ContactInfo anonymous nobody@example.invalid # Put your contact info here if you are planning to run in production
 
-# Log debug file /tmp/tor-server-debug.log
+# Log debug file /tmp/tor-bridge-debug.log

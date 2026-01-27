@@ -15,9 +15,9 @@ USER toruser
 WORKDIR /app
 
 # Copy torrc + PT binary
-COPY docker/server/torrc /app/torrc
+COPY docker/bridge/torrc /app/torrc
 COPY --from=builder /build/target/release/pt /usr/local/bin/pt
 
 # Entrypoint handles the Tor invocation
-COPY docker/server/entrypoint.sh /entrypoint.sh
+COPY docker/bridge/entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]

@@ -1,9 +1,9 @@
 services:
-  pt-server:
+  pt-bridge:
     build: 
       context: ../
-      dockerfile: docker/server/Dockerfile
-    container_name: pt-server
+      dockerfile: docker/bridge/Dockerfile
+    container_name: pt-bridge
     networks:
       tornet:
         ipv4_address: 172.21.0.10
