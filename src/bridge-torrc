@@ -7,8 +7,9 @@ PublishServerDescriptor 0 # We do not publish our server descriptor
 BridgeDistribution none # Neither do we distribute our bridge contact info
 
 # Define as Bridge, using a pt
-ServerTransportPlugin foobar exec ./target/debug/pt # Name of the transport and path to the transport binary
-ServerTransportListenAddr foobar 127.0.0.1:1234 # This speaks the custom protocol, sits inbetween pt bridge and client binaries
+# ServerTransportPlugin foobar exec ./target/debug/pt # Name of the transport and path to the transport binary
+ServerTransportPlugin obfs3 exec ./shadow/lyrebird # Name of the transport and path to the transport binary
+ServerTransportListenAddr obfs3 127.0.0.1:1234 # This speaks the custom protocol, sits inbetween pt bridge and client binaries
 BridgeRelay 1 # Yes, we are a bridge
 
 # Set up Networking
