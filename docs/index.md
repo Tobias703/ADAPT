@@ -2,7 +2,29 @@
 
 This is the full documentation of TORPEDO - Tor Pluggable transport Engineering and Development Onboarding. It'll help you get started with developing Tor Pluggable Transports while trying to avoid as much Tor-Specific headaches as possible so you can focus on your Implementation and not be at the mercy of the Tor-Network having a good or bad day.
 
+## Abbreviations
+There are several terms and abbreviations used in this documentation. For clarity, they are listed here:
+
+PT - Pluggable Transport
+
+PT-client - The part of the PT, which is running on the user's machine
+
+PT-bridge - In documentation also often referred to as 'PT-server', but for clarity in this project always referred to as 'PT-bridge' is the part of the PT, which is running on a server and acts as a bridge into the tor network.
+
+## Where do I find what?
+
+The documentation is split into several parts:
+
+[The Basics](./basics/01-basics.md): This page talks about the theory behind Pluggable Transports and provides important foundational knowledge for implementing PTs.
+
+[Local Hosting](./local/01-local.md): Here's all the Info about locally hosting and using PTs.
+
+[Docker](./docker/01-docker.md): Here's everything regarding PTs hosted fully under docker. Note that hosting a client under docker and a bridge locally and vice versa is possible.
+
+[Shadow](./shadow/01-shadow.md): This is the full documentation for the Shadow Network Simulator. It provides developers with a very quick, easy and most importantly deterministic way of testing their PTs without having to rely on the whims of the Tor-Network.
+
 ## Project layout
+The following shows the Layout of the Project. Relevant files have small comments behind them to tell you what they roughly are. Important files will have their documentation pages linked.
 
     .github/
         workflows/
