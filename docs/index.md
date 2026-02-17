@@ -1,6 +1,6 @@
-# TORPEDO
+# Index
 
-This is the full documentation of TORPEDO - Tor Pluggable transport Engineering and Development Onboarding. It'll help you get started with developing Tor Pluggable Transports while trying to avoid as much Tor-Specific headaches as possible so you can focus on your Implementation and not be at the mercy of the Tor-Network having a good or bad day.
+This is the full documentation of ADAPT - Accelerated Development & Adaption of Pluggable Transports. It'll help you get started with developing Tor Pluggable Transports while trying to avoid as much Tor-Specific headaches as possible so you can focus on your Implementation and not be at the mercy of the Tor-Network having a good or bad day.
 
 ## Abbreviations
 There are several terms and abbreviations used in this documentation. For clarity, they are listed here:
