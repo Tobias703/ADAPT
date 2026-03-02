@@ -1,0 +1,29 @@
+# torrc bridge configuration
+
+```yaml
+# The "pt bridge" refers to the instance of tor defined here; the "pt bridge binary" refers to the rust binary that actually runs the pt
+
+DataDirectory ./ptbridge # A place to save our fancy data
+
+# Disable Bridge IP Distribution
+PublishServerDescriptor 0 # We do not publish our server descriptor
+BridgeDistribution none # Neither do we distribute our bridge contact info
+
+# Define as Bridge, using a pt
+ServerTransportPlugin obfs3,obfs4 exec ../../../lyrebird # Name of the transport and path to the transport binary
+ServerTransportListenAddr obfs3 100.0.0.10:1235 # This speaks the custom protocol, sits inbetween pt bridge and client binaries
+ServerTransportListenAddr obfs4 100.0.0.10:1234
+BridgeRelay 1 # Yes, we are a bridge
+
+# Set up Networking
+Address 100.0.0.10 # Hello, I'm the pt-bridge
+ORPort 9111 IPv4Only # Onion Routing port, negotiates with pt bridge binary
+DirPort 9112
+ExtORPort 100.0.0.10:9051 # Extended Onion routing, control channel to talk to pt bridge binary
+SocksPort 0 # Disable SocksPort as this should not be used as a non-pt bridge
+
+# Contact info so Tor does not complain
+ContactInfo anonymous nobody@example.invalid # Put your contact info here if you are planning to run in production
+
+Log debug file ./tor-bridge-debug.log
+```

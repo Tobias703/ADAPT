@@ -1,16 +1,13 @@
-# The "pt client" refers to the instance of tor defined here; the "pt client binary" refers to the rust binary that actually runs the pt
+# The documentation for this Config is found at the Project-Specific Information under Client torrc
 
-DataDirectory ./ptclient # A place to save our fancy data
+DataDirectory ./ptclient
 
-# Use the PT
-UseBridges 1 # Yes, we want to use a bridge
-ClientTransportPlugin obfs3 exec ../../../lyrebird # Name of the transport and path to the transport binary
-Bridge obfs3 100.0.0.10:1235 # This speaks the custom protocol, sits inbetween pt client and bridge binaries.
+UseBridges 1
+ClientTransportPlugin obfs3 exec ../../../lyrebird
+Bridge obfs3 100.0.0.10:1235
 
-#Port for Connection
-SocksPort 127.0.0.1:9052 # The tor client uses this to connect to the pt client
+SocksPort 127.0.0.1:9052
 
-# Disable Conflux (effectively just removes the "just one bridge" warning)
 ConfluxEnabled 0
 
-Log debug file ./tor-client-debug.log
+# Log debug file ./tor-client-debug.log

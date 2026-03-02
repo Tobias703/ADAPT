@@ -15,12 +15,22 @@ theme:
         name: Light mode
       primary: blue
       accent: deep orange
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
 nav:
   - Index: index.md
   - Basics:
     - Basics and General Information: ./basics/basics.md
   - Project-Specific:
     - Project-Specific Information: ./project-specific/project-specific.md
+    - Client torrc: ./project-specific/torrc-client.md
+    - Bridge torrc: ./project-specific/torrc-bridge.md
   - Shadow Network Simulator:
     - What is Shadow?: ./shadow/shadow.md
   - Local Deployment:
