@@ -3,6 +3,7 @@
 This is the full documentation of ADAPT - Accelerated Development & Adaption of Pluggable Transports. It'll help you get started with developing Tor Pluggable Transports while trying to avoid as much Tor-Specific headaches as possible so you can focus on your Implementation and not be at the mercy of the Tor-Network having a good or bad day.
 
 ## Abbreviations
+
 There are several terms and abbreviations used in this documentation. For clarity, they are listed here:
 
 PT - Pluggable Transport
@@ -15,15 +16,18 @@ PT-bridge - In documentation also often referred to as 'PT-server', but for clar
 
 The documentation is split into several parts:
 
-[The Basics](./basics/01-basics.md): This page talks about the theory behind Pluggable Transports and provides important foundational knowledge for implementing PTs.
+[The Basics](./basics/basics.md): This section talks about the theory behind Pluggable Transports and provides important foundational knowledge for implementing PTs.
 
-[Local Hosting](./local/01-local.md): Here's all the Info about locally hosting and using PTs.
+[Project-Specific Information](./project-specific/project-specific.md): This section describes specific aspects of this project, which cannot be uniquely associated with one of the following sections. An example would be the torrc configurations used, since they vary very little between deployment types.
 
-[Docker](./docker/01-docker.md): Here's everything regarding PTs hosted fully under docker. Note that hosting a client under docker and a bridge locally and vice versa is possible.
+[Local Hosting](./local/local.md): Here's all the Info about locally hosting and using PTs.
 
-[Shadow](./shadow/01-shadow.md): This is the full documentation for the Shadow Network Simulator. It provides developers with a very quick, easy and most importantly deterministic way of testing their PTs without having to rely on the whims of the Tor-Network.
+[Docker](./docker/docker.md): Here's everything regarding PTs hosted fully under docker. Note that hosting a client under docker and a bridge locally and vice versa is possible.
+
+[Shadow](./shadow/shadow.md): This is the full documentation for the Shadow Network Simulator. It provides developers with a very quick, easy and most importantly deterministic way of testing their PTs without having to rely on the whims of the Tor-Network.
 
 ## Project layout
+
 The following shows the Layout of the Project. Relevant files have small comments behind them to tell you what they roughly are. Important files will have their documentation pages linked.
 
     .github/

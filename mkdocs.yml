@@ -15,3 +15,16 @@ theme:
         name: Light mode
       primary: blue
       accent: deep orange
+nav:
+  - Index: index.md
+  - Basics:
+    - Basics and General Information: ./basics/basics.md
+  - Project-Specific:
+    - Project-Specific Information: ./project-specific/project-specific.md
+  - Shadow Network Simulator:
+    - What is Shadow?: ./shadow/shadow.md
+  - Local Deployment:
+    - Local Deployment: ./local/local.md
+  - Docker Deployment:
+    - Docker Deployment: ./docker/docker.md
+    - docker-compose.yml: ./docker/docker-compose.yml.md
