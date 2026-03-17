@@ -6,15 +6,15 @@ theme:
       toggle:
         icon: material/weather-sunny
         name: Dark mode
-      primary: green
+      primary: purple
       accent: deep purple
 
     - scheme: default
       toggle:
         icon: material/weather-night
         name: Light mode
-      primary: blue
-      accent: deep orange
+      primary: purple
+      accent: deep purple
 markdown_extensions:
   - pymdownx.highlight:
       anchor_linenums: true
@@ -27,12 +27,15 @@ nav:
   - Index: index.md
   - Basics:
     - Basics and General Information: ./basics/basics.md
+    - Running a Pluggable Transport: ./basics/running-a-pt.md
   - Project-Specific:
     - Project-Specific Information: ./project-specific/project-specific.md
     - Client torrc: ./project-specific/torrc-client.md
     - Bridge torrc: ./project-specific/torrc-bridge.md
   - Shadow Network Simulator:
     - What is Shadow?: ./shadow/shadow.md
+    - Getting started: ./shadow/getting-started.md
+    - Configuring Shadow: ./shadow/configuration.md
   - Local Deployment:
     - Local Deployment: ./local/local.md
   - Docker Deployment:

@@ -1,1 +1,3 @@
-# Local Hosting
+# Local Deployment
+
+This section describes, how you can host a pluggable transport locally. This is meant as a test deployment, as PT-client and PT-server are both running on the client machine. This would not make any sense in an actual deployment scenario. For proper deployment, you can look into either the [Shadow Section](../shadow/shadow.md), which discusses deployment in the Shadow Network Simulator and as such requires a clean and proper deployment. Alternatively, the section on [Docker Deployment](../docker/docker.md) is also close to an actual deployment, since the PT-Environment is containerised and as such forced to be configured as if it were in an actual Network.

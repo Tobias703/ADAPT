@@ -12,17 +12,18 @@ A Pluggable Transport (PT) is a way to circumvent censorship. The main idea of P
 
 ### How does it Work?
 
-Looking at the Pluggable Transport as a whole, it has four points of communication:
+Looking at the Pluggable Transport as a whole, it has four points of communication plus two between the tor binary and the client and target resources:
 
 - An application talking to the Tor binary on the Client machine
-- The PT-client talking to the Tor binary on the Client machine
+- The Tor binary talking to the PT-client on the Client machine
 - The PT-client talking to the PT-bridge
 - The PT-bridge talking to the PT-client
-- The PT-bridge talking to the tor network
+- The PT-bridge talking to the Tor binary on the server
+- The Tor binary talking to the Tor network on the server
 
 The communication between PT-client and PT-Bridge can technically be seen as a single point of communication, it is listed here twice to clarify the points of interaction for both client and server instead of treating the two components as one.
 
-#### Typical connection flow
+### Typical connection flow
 
 **Local Application <-> local Tor binary:** Accepts incoming connections from local software like a browser. This can be done using a SOCKS connection. This project exclusively uses a SOCKS5 connection via port 9052 to connect the PT-client to whatever application wants to make use of it. This is configured in the torrc for the PT-client. For testing connection to the Tor network, users can either install a Plugin like FoxyProxy in Firefox and connect it to 127.0.0.1:9052 via SOCKS5, or configure that same address as a Bridge inside the Tor-Browser. To verify if the Pluggable Transport is working, visit: [https://check.torproject.org/](https://check.torproject.org/)
 
