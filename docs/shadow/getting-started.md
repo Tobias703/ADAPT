@@ -10,7 +10,7 @@ Additional dependencies you might want to install are:
 
 - **git** for cloning the repository
 - **curl** for installing rustup
-- **tor** which is used in the simulation. Installing tor via `apt` usually does not yield the newest version. This is fine for shadow but might cause issues with an actual deployment. To get the newest version of tor, refer to this site: [https://support.torproject.org/little-t-tor/getting-started/installing/](https://support.torproject.org/little-t-tor/getting-started/installing/)
+- **tor** which is used in the simulation. Installing Tor via `apt` usually does not yield the newest version. This is fine for shadow but might cause issues with an actual deployment. To get the newest version of Tor, refer to this site: [https://support.torproject.org/little-t-tor/getting-started/installing/](https://support.torproject.org/little-t-tor/getting-started/installing/)
 
 To give the shadow-setup in the next step a better chance of succeeding, reboot your PC after installing the dependencies.
 

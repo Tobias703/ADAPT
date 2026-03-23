@@ -28,10 +28,10 @@ nav:
   - Basics:
     - Basics and General Information: ./basics/basics.md
     - Running a Pluggable Transport: ./basics/running-a-pt.md
-  - Project-Specific:
-    - Project-Specific Information: ./project-specific/project-specific.md
-    - Client torrc: ./project-specific/torrc-client.md
-    - Bridge torrc: ./project-specific/torrc-bridge.md
+  - Deployment-Independent:
+    - Deployment-Independent Information: ./deployment-independent/deployment-independent.md
+    - Client torrc: ./deployment-independent/torrc-client.md
+    - Bridge torrc: ./deployment-independent/torrc-bridge.md
   - Shadow Network Simulator:
     - What is Shadow?: ./shadow/shadow.md
     - Getting started: ./shadow/getting-started.md

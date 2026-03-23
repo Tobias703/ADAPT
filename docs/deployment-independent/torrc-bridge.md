@@ -1,7 +1,7 @@
-# torrc bridge configuration
+# torrc configuration for a PT-bridge
 
 ```yaml
-# The "pt bridge" refers to the instance of tor defined here; the "pt bridge binary" refers to the rust binary that actually runs the pt
+# The "pt bridge" refers to the instance of Tor defined here; the "pt bridge binary" refers to the rust binary that actually runs the pt
 
 DataDirectory ./ptbridge # A place to save our fancy data
 

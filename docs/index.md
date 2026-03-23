@@ -10,7 +10,7 @@ PT - Pluggable Transport
 
 PT-client - The part of the PT, which is running on the user's machine
 
-PT-bridge - In documentation also often referred to as 'PT-server', but for clarity in this project always referred to as 'PT-bridge' is the part of the PT, which is running on a server and acts as a bridge into the tor network.
+PT-bridge - In documentation also often referred to as 'PT-server', but for clarity in this project always referred to as 'PT-bridge' is the part of the PT, which is running on a server and acts as a bridge into the Tor network.
 
 ## Where do I find what?
 
@@ -18,7 +18,7 @@ The documentation is split into several parts:
 
 [The Basics](./basics/basics.md): This section talks about the theory behind Pluggable Transports and provides important foundational knowledge for implementing PTs.
 
-[Project-Specific Information](./project-specific/project-specific.md): This section describes specific aspects of this project, which cannot be uniquely associated with one of the following sections. An example would be the torrc configurations used, since they vary very little between deployment types.
+[Project-Specific Information](./deployment-independent/deployment-independent.md): This section describes specific aspects of this project, which cannot be uniquely associated with one of the following sections. An example would be the torrc configurations used, since they vary very little between deployment types.
 
 [Local Hosting](./local/local.md): Here's all the Info about locally hosting and using PTs.
 

@@ -133,7 +133,7 @@ hosts:
       args: -m http.server 8080
       start_time: 5s
       expected_final_state: running
-    - path: /usr/bin/tor # tor hidden service
+    - path: /usr/bin/tor # Tor hidden service
       args: --defaults-torrc torrc-defaults -f torrc
       start_time: 5m
       expected_final_state: running

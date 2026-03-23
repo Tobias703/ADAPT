@@ -8,11 +8,11 @@ This chapter should give you a basic idea of what Pluggable Transports (PTs) are
 
 [https://github.com/Pluggable-Transports/Pluggable-Transports-spec](https://github.com/Pluggable-Transports/Pluggable-Transports-spec)
 
-A Pluggable Transport (PT) is a way to circumvent censorship. The main idea of PTs is that everyone can easily implement their own communication protocol, which is meant to make it harder for censors to spot tor traffic. This depends on how well the PT is implemented, since the custom protocol could also be very easy to detect if not properly implemented. Using publicly available pluggable transports is also possible. The lyrebird binary for example ships the obfs suite. PTs are not directly part of the tor network. They consist of a client and a bridge, where the client lives on the user's machine and talks to the bridge, which is a server that is able to communicate with the tor network.
+A Pluggable Transport (PT) is a way to circumvent censorship. The main idea of PTs is that everyone can easily implement their own communication protocol, which is meant to make it harder for censors to spot Tor traffic. This depends on how well the PT is implemented, since the custom protocol could also be very easy to detect if not properly implemented. Using publicly available pluggable transports is also possible. The lyrebird binary for example ships the obfs suite. PTs are not directly part of the Tor network. They consist of a client and a bridge, where the client lives on the user's machine and talks to the bridge, which is a server that is able to communicate with the Tor network.
 
 ### How does it Work?
 
-Looking at the Pluggable Transport as a whole, it has four points of communication plus two between the tor binary and the client and target resources:
+Looking at the Pluggable Transport as a whole, it has four points of communication plus two between the Tor binary and the client and target resources:
 
 - An application talking to the Tor binary on the Client machine
 - The Tor binary talking to the PT-client on the Client machine
@@ -33,4 +33,4 @@ The communication between PT-client and PT-Bridge can technically be seen as a s
 
 **PT-bridge <-> bridge Tor binary:** The Tor binary talks to the Pluggable Transport binary via the [Pluggable Transport Specification](https://github.com/Pluggable-Transports/Pluggable-Transports-spec). For that, the Pluggable Transport binary is called from the torrc of the PT-bridge along with the pluggable transports that the bridge wants to serve. This is done via the `ServerTransportPlugin` configuration. This config is followed by the name(s) of the PT(s) to be called (seperated by commas if it's more then one), followed by `exec` and the path to the PT binary. Remember, that a single PT binary can include several Pluggable Transports. The lyrebird binary for example ships the obfs2, obfs3 and obfs4 PTs.
 
-**bridge Tor binary <-> Tor Network:** The server is assumed to be in a non-censored network. As such, its Tor binary bootstraps into the tor network independently of the PT logic.
+**bridge Tor binary <-> Tor Network:** The server is assumed to be in a non-censored network. As such, its Tor binary bootstraps into the Tor network independently of the PT logic.

@@ -1,7 +1,7 @@
-# torrc client configuration
+# torrc configuration for a PT-client
 
 ```yaml
-# The "pt client" refers to the instance of tor defined here; the "pt client binary" refers to the rust binary that actually runs the pt
+# The "pt client" refers to the instance of Tor defined here; the "pt client binary" refers to the rust binary that actually runs the pt
 
 DataDirectory ./ptclient # A place to save our fancy data
 
