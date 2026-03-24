@@ -1,5 +1,5 @@
 general:
-  stop_time: 10m
+  stop_time: 7m
 
 network:
   graph:
@@ -78,18 +78,19 @@ hosts:
       args: --Address client --Nickname client --defaults-torrc torrc-defaults -f torrc
       environment:
         RUST_BACKTRACE: "1"
-      start_time: 2m
+      start_time: 4m
       expected_final_state: running
     - path: /usr/bin/tor # raw tor
       args: --Address clientnopt --Nickname clientnopt --defaults-torrc torrc-defaults -f torrc-nopt
-      start_time: 2m
+      start_time: 4m
       expected_final_state: running
     - path: /usr/bin/curl # curl via pt
-      args: ["--socks5-hostname", "127.0.0.1:9052", "tinbkh6cadabugehfqjqydkd74heoifq2x4q2my44a5oi4546f4oklqd.onion"]
-      start_time: 7m
+      args: ["--max-time", "60", "--socks5-hostname", "127.0.0.1:9052", "tinbkh6cadabugehfqjqydkd74heoifq2x4q2my44a5oi4546f4oklqd.onion"]
+      start_time: 5m
+      expected_final_state: {exited: 0}
     - path: /usr/bin/curl # direct curl
-      args: ["http://100.0.0.10:8080"]
-      start_time: 3m
+      args: ["--max-time", "60", "http://100.0.0.10:8080"]
+      start_time: 5m
       expected_final_state: {exited: 28}
 
   client3:
@@ -100,18 +101,19 @@ hosts:
       args: --Address client --Nickname client --defaults-torrc torrc-defaults -f torrc
       environment:
         RUST_BACKTRACE: "1"
-      start_time: 2m
+      start_time: 4m
       expected_final_state: running
     - path: /usr/bin/tor # raw tor
       args: --Address clientnopt --Nickname clientnopt --defaults-torrc torrc-defaults -f torrc-nopt
-      start_time: 2m
+      start_time: 4m
       expected_final_state: running
     - path: /usr/bin/curl # curl via pt
-      args: ["--socks5-hostname", "127.0.0.1:9052", "tinbkh6cadabugehfqjqydkd74heoifq2x4q2my44a5oi4546f4oklqd.onion"]
-      start_time: 7m
+      args: ["--max-time", "60", "--socks5-hostname", "127.0.0.1:9052", "tinbkh6cadabugehfqjqydkd74heoifq2x4q2my44a5oi4546f4oklqd.onion"]
+      start_time: 5m
+      expected_final_state: {exited: 0}
     - path: /usr/bin/curl # direct curl
-      args: ["http://100.0.0.10:8080"]
-      start_time: 3m
+      args: ["--max-time", "60", "http://100.0.0.10:8080"]
+      start_time: 5m
       expected_final_state: {exited: 28}
 
   # pt-bridge as bridge into Tor Network
@@ -121,7 +123,7 @@ hosts:
     processes:
       - path: /usr/bin/tor
         args: --Address bridge --Nickname bridge --defaults-torrc torrc-defaults -f torrc
-        start_time: 1m
+        start_time: 3m
         expected_final_state: running
   
   # Target resource, unreachable directly from client
@@ -135,6 +137,6 @@ hosts:
       expected_final_state: running
     - path: /usr/bin/tor # Tor hidden service
       args: --defaults-torrc torrc-defaults -f torrc
-      start_time: 5m
+      start_time: 3m
       expected_final_state: running
     

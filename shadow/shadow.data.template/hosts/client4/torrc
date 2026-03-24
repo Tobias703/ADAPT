@@ -4,7 +4,7 @@ DataDirectory ./ptclient
 
 UseBridges 1
 ClientTransportPlugin obfs4 exec ../../../lyrebird
-Bridge obfs4 100.0.0.10:1234 BCC0C43EBEF9309D93D5DA52EDBC6C1F3528319E cert=wgYphbK4qjxy/AC9vpZoAsdwg4hWKC1yQxbFQZa1GYYBBCdGu07GBP0T3A+cRwBAPEk8CQ iat-mode=0
+Bridge obfs4 100.0.0.10:1234 BCC0C43EBEF9309D93D5DA52EDBC6C1F3528319E cert=nhmqfrazfv8rzbVJOEot20YpkTcMqlL3jhCvsw9mmPOSviysZz11qHi20OKYJp9cgVkJYA iat-mode=0
 
 SocksPort 127.0.0.1:9052
 
