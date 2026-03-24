@@ -2,6 +2,9 @@ services:
   shadow:
     build: .
     container_name: shadow
+    user: "${UID}:${GID}"
+    environment:
+      - HOME=/tmp
     volumes:
       - ../:/workspace
     working_dir: /workspace

@@ -47,6 +47,9 @@ RUN git clone https://github.com/shadow/shadow.git && \
 
 RUN cd /opt/shadow && ./setup install
 
+RUN cp -rn /root/.local/* /usr/local/ && \
+    chmod -R +rx /usr/local/bin /usr/local/lib
+
 ENV PATH="/root/.local/bin:${PATH}"
 
 WORKDIR /workspace
