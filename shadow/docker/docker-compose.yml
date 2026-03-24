@@ -1,0 +1,20 @@
+services:
+  shadow:
+    build: .
+    container_name: shadow
+    volumes:
+      - ../:/workspace
+    working_dir: /workspace
+    tty: true
+    stdin_open: true
+
+    cap_add:
+      - SYS_PTRACE
+    security_opt:
+      - seccomp:unconfined
+
+    deploy:
+      resources:
+        limits:
+          cpus: "4"
+          memory: 8g
