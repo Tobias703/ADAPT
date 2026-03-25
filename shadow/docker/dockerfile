@@ -54,4 +54,4 @@ ENV PATH="/root/.local/bin:${PATH}"
 
 WORKDIR /workspace
 
-ENTRYPOINT ["bash", "/workspace/run_shadow.sh"]
+ENTRYPOINT ["bash", "/workspace/shadow_run.sh"]
