@@ -3,7 +3,6 @@
 DataDirectory /tmp/ptclient
 
 UseBridges 1
-# ClientTransportPlugin foobar exec ./target/debug/pt # TODO: build example PT
 ClientTransportPlugin obfs3 exec ./shadow/lyrebird
 Bridge obfs3 127.0.0.1:1234
 

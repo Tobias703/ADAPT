@@ -1,8 +1,0 @@
-[package]
-name = "pt"
-version = "0.1.0"
-edition = "2024"
-
-[dependencies]
-onion_peel = { git = "https://github.com/casept/onion-peel"}
-socks5_frontend = { git = "https://github.com/casept/socks5_frontend"}
