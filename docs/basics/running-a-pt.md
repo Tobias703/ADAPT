@@ -8,7 +8,7 @@ A PT is usually shipped in form of a binary/executable. This binary however, is 
 
 ### Why run it through Tor?
 
-As already mentioned in the [Basics](basics.md), a PT communicates via the Pluggable Transport Specification. This means, that you must call the PT with a piece of software that is also communicating with the most recent PT-Spec. This piece of software is Tor. So in order to run a PT, an instance of Tor has to simply be configured to use said PT. The rest is done automatically, communicated over the PT-Spec. Tor handles all Tor-specific logic, while the PT handles the communication between the client- and server-instances of the PT with the desired protocol/method of communication.
+As already mentioned in the [Basics](basics.md), a PT communicates via the Pluggable Transport Specification. This means, that you must call the PT with a piece of software that is also communicating with the most recent PT-Spec. This piece of software is Tor. So in order to run a PT, an instance of Tor has to simply be configured to use said PT. The rest is done automatically, communicated over the PT-Spec. Tor handles all Tor-specific logic, while the PT handles the communication between the client- and bridge-instances of the PT with the desired protocol/method of communication.
 
 ### How to run it through Tor
 
@@ -19,7 +19,7 @@ As described above, to run a pluggable transport through Tor, a valid configurat
 To run a PT-client, the torrc has to include the following:
 
 - A `DataDirectory [path]` to store the state of the PT during operation and after shutdown
-- `UseBridges 1` to tell tor, that it should use a bridge (the PT-server is a bridge)
+- `UseBridges 1` to tell tor, that it should use a bridge (the PT-bridge is a bridge)
 - The `ClientTransportPlugin [pt-name(s)]`, which tells Tor, where the PT-binary is and which Pluggable Transport the PT-binary has to use as some binaries ship several Pluggable transports
 - A `Bridge [pt-name] [ip:port]` line, which describes which PT has to use which bridge and what IP address and port for the bridge is
 - A `SocksPort [ip:port]` for local applications to connect with the Pluggable Transport
@@ -32,10 +32,10 @@ A PT-bridge takes a bit more configuration, since it has to talk to the Tor-netw
 
 - A `DataDirectory [path]` to store the state of the PT during operation and after shutdown
 - The `ServerTransportPlugin [pt-name(s)] exec [path_to_pt-binary]`, which tells Tor, where the PT-binary is and which Pluggable Transport the PT-binary has to use as some binaries ship several Pluggable transports
-- The `ServerTransportListenAddr [pt-name] [ip:port]`, which defines the port on which the server should listen in order to recieve connections for the PT, listed in this option
+- The `ServerTransportListenAddr [pt-name] [ip:port]`, which defines the port on which the bridge should listen in order to recieve connections for the PT, listed in this option
 - `BrigeRelay 1`, because the PT-bridge is, in fact, a bridge
 - `Address [ip]` to define the bridge's ip-address
-- `ORPort [port]` to define the Onion-Routing port for connections to Tor clients and servers
+- `ORPort [port]` to define the Onion-Routing port for connections to Tor clients and bridges
 - `ExtORPort [ip:port]` opens the Extended ORPort for connections to the Pluggable Transport
 
 Optional but strongly recommended:
@@ -45,4 +45,4 @@ Optional but strongly recommended:
 - `SocksPort 0` to disable any non-bridge related connections
 - `ContactInfo [name] [email-address]` to optionally provide Tor with information about how to contact you if something is wrong with the bridge
 
-Using these parameters, Tor can successfully enable a PT-client to connect to its PT-server and its PT-server to connect to the Tor-network if the config is correct and the client is correctly set up and running. For detailled information and an example of a `bridge-torrc`, refer to the [section regarding the Bridge torrc](../deployment-independent/torrc-bridge.md)
+Using these parameters, Tor can successfully enable a PT-client to connect to its PT-bridge and its PT-bridge to connect to the Tor-network if the config is correct and the client is correctly set up and running. For detailled information and an example of a `bridge-torrc`, refer to the [section regarding the Bridge torrc](../deployment-independent/torrc-bridge.md)

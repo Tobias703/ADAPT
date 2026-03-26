@@ -18,10 +18,10 @@ Looking at the Pluggable Transport as a whole, it has four points of communicati
 - The Tor binary talking to the PT-client on the Client machine
 - The PT-client talking to the PT-bridge
 - The PT-bridge talking to the PT-client
-- The PT-bridge talking to the Tor binary on the server
-- The Tor binary talking to the Tor network on the server
+- The PT-bridge talking to the Tor binary on the bridge server
+- The Tor binary talking to the Tor network on the bridge server
 
-The communication between PT-client and PT-Bridge can technically be seen as a single point of communication, it is listed here twice to clarify the points of interaction for both client and server instead of treating the two components as one.
+The communication between PT-client and PT-Bridge can technically be seen as a single point of communication, it is listed here twice to clarify the points of interaction for both client and bridge server instead of treating the two components as one.
 
 ### Typical connection flow
 
@@ -33,4 +33,4 @@ The communication between PT-client and PT-Bridge can technically be seen as a s
 
 **PT-bridge <-> bridge Tor binary:** The Tor binary talks to the Pluggable Transport binary via the [Pluggable Transport Specification](https://github.com/Pluggable-Transports/Pluggable-Transports-spec). For that, the Pluggable Transport binary is called from the torrc of the PT-bridge along with the pluggable transports that the bridge wants to serve. This is done via the `ServerTransportPlugin` configuration. This config is followed by the name(s) of the PT(s) to be called (seperated by commas if it's more then one), followed by `exec` and the path to the PT binary. Remember, that a single PT binary can include several Pluggable Transports. The lyrebird binary for example ships the obfs2, obfs3 and obfs4 PTs.
 
-**bridge Tor binary <-> Tor Network:** The server is assumed to be in a non-censored network. As such, its Tor binary bootstraps into the Tor network independently of the PT logic.
+**bridge Tor binary <-> Tor Network:** The bridge server is assumed to be in a non-censored network. As such, its Tor binary bootstraps into the Tor network independently of the PT logic.
