@@ -6,7 +6,7 @@ services:
     environment:
       - HOME=/tmp
     volumes:
-      - ../:/workspace
+      - ./:/workspace
     working_dir: /workspace
     tty: true
     stdin_open: true

@@ -23,6 +23,7 @@ markdown_extensions:
   - pymdownx.inlinehilite
   - pymdownx.snippets
   - pymdownx.superfences
+  - admonition
 nav:
   - Index: index.md
   - Basics:

@@ -4,11 +4,11 @@ Shadow consists of three (or two) main configuration parts. These are the `shado
 
 ## shadow.yaml
 
-This is the main configuration file for shadow. It contains information about how the simulation is supposed to run. This includes: Simulated time for the simulation to run (executes much faster then the defined time, since it is simulated time), topology, hosts in the network, what each host executes and when they execute it and which network node each host is associated with. The full shadow config specification can be found here: [https://shadow.github.io/docs/guide/shadow_config_spec.html](https://shadow.github.io/docs/guide/shadow_config_spec.html)
+This is the main configuration file for shadow. It contains information about how the simulation is supposed to run. This includes: Simulated time for the simulation to run (executes much faster then the defined time, since it is simulated time), topology, hosts in the network, what each host executes and when they execute it and which network node each host is associated with. The full shadow config specification can be found here: <https://shadow.github.io/docs/guide/shadow_config_spec.html>
 
 ## topology.gml
 
-This file defines the topology of the network. It includes all of the nodes and edges that define the structure of the network and how each node can reach each other node. This could be included in the `shadow.yaml` file but is separated into it's own file for a cleaner implementation. The specification for shadow network topologies can be found here: [https://shadow.github.io/docs/guide/network_graph_spec.html](https://shadow.github.io/docs/guide/network_graph_spec.html)
+This file defines the topology of the network. It includes all of the nodes and edges that define the structure of the network and how each node can reach each other node. This could be included in the `shadow.yaml` file but is separated into it's own file for a cleaner implementation. The specification for shadow network topologies can be found here: <https://shadow.github.io/docs/guide/network_graph_spec.html>
 
 ## shadow.data.template
 
