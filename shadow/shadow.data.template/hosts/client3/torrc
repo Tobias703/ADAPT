@@ -3,11 +3,11 @@
 DataDirectory ./ptclient
 
 UseBridges 1
-ClientTransportPlugin obfs3 exec ../../../lyrebird
-Bridge obfs3 100.0.0.10:1235
+ClientTransportPlugin foobar exec ../../../foobar
+Bridge foobar 100.0.0.10:1235
 
 SocksPort 127.0.0.1:9052
 
 ConfluxEnabled 0
 
-# Log debug file ./tor-client-debug.log
+Log debug file ./tor-client-debug.log

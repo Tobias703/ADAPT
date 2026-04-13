@@ -1,5 +1,5 @@
 /shadow/shadow.data/*
 shadow.log
 .venv/*
-build/*
-dist/*
+pythonTransport/build/*
+pythonTransport/dist/*
