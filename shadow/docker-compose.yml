@@ -2,7 +2,7 @@ services:
   shadow:
     build: .
     container_name: shadow
-    user: "${UID}:${GID}"
+    user: "${LOCAL_UID}:${LOCAL_GID}"
     environment:
       - HOME=/tmp
     volumes:

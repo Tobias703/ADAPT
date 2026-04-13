@@ -51,6 +51,7 @@ On windows, you only have to install `Docker Desktop` (online or via the MS Stor
 |-|-|
 |`**time="2026-03-26T14:37:56+01:00" level=warning msg="The \"UID\" variable is not set. Defaulting to a blank string."`|This is perfectly normal. This variable is only needed for permission management in Linux. Windows does not need that.|
 |`/workspace/shadow_run.sh: line 2: cd: $'/workspace\r': No such file or directory`|The issue here are windows lineendings. Open the `shadow_run.sh` script in the `shadow` directory in VSCode, and on the lower right corner of the screen, press on `CRLF` and select `LF` in the resulting menu|
+|`./docker_run.sh unable to get image 'shadow-shadow': permission denied while trying to connect to the docker API at unix:///var/run/docker.sock`|Docker needs to run as root if your user is not part of the `docker` group. Running the command as sudo will result in the output being owned by root, which can cause issues. To fix this, run `sudo usermod -aG docker $USER` to add your user to the `docker` group and then log out and back in.|
 
 ### macOS
 
