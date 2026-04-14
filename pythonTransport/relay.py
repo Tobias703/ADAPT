@@ -30,8 +30,29 @@ CHUNK = 65536   # bytes per read() call
 
 
 # ──────────────────────────────────────────────────────────────────────────────
-# Internal one-direction pump
+# Internal helpers
 # ──────────────────────────────────────────────────────────────────────────────
+
+async def _close_writer(writer: asyncio.StreamWriter) -> None:
+    """
+    Flush any buffered output, then close the writer.
+
+    Calling writer.close() without a prior drain() can silently drop data
+    that has been write()-buffered but not yet handed to the kernel.  We
+    drain first, tolerating any error (the peer may already be gone), then
+    close and wait for the underlying transport to finish its teardown.
+    """
+    try:
+        await writer.drain()
+    except Exception:
+        pass
+    try:
+        if not writer.is_closing():
+            writer.close()
+        await writer.wait_closed()
+    except Exception:
+        pass
+
 
 async def _pump_encode(
     reader: asyncio.StreamReader,
@@ -52,7 +73,7 @@ async def _pump_encode(
             BrokenPipeError, OSError) as exc:
         log.debug("pump_encode EOF/error: %s", exc)
     finally:
-        _close_quietly(writer)
+        await _close_writer(writer)
 
 
 async def _pump_decode(
@@ -80,18 +101,13 @@ async def _pump_decode(
                 writer.write(decoded)
                 await writer.drain()
     except (asyncio.IncompleteReadError, ConnectionResetError,
-            BrokenPipeError, OSError) as exc:
+            BrokenPipeError, OSError, ValueError) as exc:
+        # ValueError is included because transport decode() implementations
+        # may raise it for malformed frames; we log and close cleanly rather
+        # than letting the exception escape and silently kill the connection.
         log.debug("pump_decode EOF/error: %s", exc)
     finally:
-        _close_quietly(writer)
-
-
-def _close_quietly(writer: asyncio.StreamWriter) -> None:
-    try:
-        if not writer.is_closing():
-            writer.close()
-    except Exception:
-        pass
+        await _close_writer(writer)
 
 
 # ──────────────────────────────────────────────────────────────────────────────
@@ -110,7 +126,17 @@ async def relay(
     b_to_a_is_decode: bool = False,         # True → b_to_a_fn is a decode_fn
 ) -> None:
     """
-    Run two pump tasks concurrently until either side closes.
+    Run two pump tasks concurrently until **both** sides close.
+
+    Each pump closes its writer in its finally block, which propagates an EOF
+    to the peer's reader, causing the other pump to exit naturally.  We
+    therefore wait for ALL_COMPLETED: there is no need to cancel either task
+    because they will both terminate once the underlying connections close.
+
+    Using FIRST_COMPLETED here would be a bug: when one pump finishes (e.g.
+    the ORPort closes after sending its response), the other pump would be
+    cancelled before it could forward the in-flight reply, producing empty
+    packets on the wire.
 
     Typical usage for PT client mode::
 
@@ -144,13 +170,14 @@ async def relay(
     task_a_b = asyncio.create_task(pump_a_b)
     task_b_a = asyncio.create_task(pump_b_a)
 
-    _done, pending = await asyncio.wait(
+    # Wait for BOTH pumps to finish.
+    #
+    # Half-close propagation guarantees termination without an explicit cancel:
+    #   • When A closes, pump_a_b exits and calls _close_writer(b_writer).
+    #   • B sees EOF on its read side, finishes processing, and closes.
+    #   • pump_b_a reads EOF from b_reader, exits, and calls _close_writer(a_writer).
+    #   • Both tasks are now done.
+    await asyncio.wait(
         [task_a_b, task_b_a],
-        return_when=asyncio.FIRST_COMPLETED,
+        return_when=asyncio.ALL_COMPLETED,
     )
-    for task in pending:
-        task.cancel()
-        try:
-            await task
-        except (asyncio.CancelledError, Exception):
-            pass

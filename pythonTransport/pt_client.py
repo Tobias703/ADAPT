@@ -99,9 +99,6 @@ async def run_client(cfg: PTConfig) -> None:
     After all transports are (attempted to be) started, emit CMETHODS DONE.
     """
     # ── Upstream proxy ────────────────────────────────────────────────────────
-    # If an upstream proxy is configured we must validate and ack it.
-    # This implementation does not chain through an upstream proxy; if one is
-    # required we fail cleanly rather than silently ignoring it.
     if cfg.upstream_proxy:
         log.warning("Upstream proxy configured (%s) but not supported; aborting",
                     cfg.upstream_proxy)
@@ -109,10 +106,6 @@ async def run_client(cfg: PTConfig) -> None:
             f"upstream proxy chaining not supported by this implementation"
         )
         return
-    # No upstream proxy → nothing to emit (spec only requires PROXY DONE/ERROR
-    # when TOR_PT_PROXY is actually set)
-
-    known = transport_mod.available()
 
     for name in cfg.transports:
         if not transport_mod.is_registered(name):
@@ -136,7 +129,8 @@ async def run_client(cfg: PTConfig) -> None:
         ipc.emit_cmethod(name, listen_addr)
         log.info("Transport %r client listener ready at %s", name, listen_addr)
 
-        # Keep server running in the background for the lifetime of the process
-        asyncio.get_event_loop().create_task(server.serve_forever())
+        # Use get_running_loop() — get_event_loop() is deprecated in a running
+        # async context as of Python 3.10 and may return the wrong loop.
+        asyncio.get_running_loop().create_task(server.serve_forever())
 
     ipc.emit_cmethods_done()

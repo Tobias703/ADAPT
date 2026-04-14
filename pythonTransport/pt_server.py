@@ -20,8 +20,7 @@ Notes:
     If not specified for a transport, bind to 0.0.0.0:0 (OS-assigned port).
   • OR port comes from -orport / TOR_PT_ORPORT.
   • Extended OR port (ExtORPort) support is detected but this implementation
-    falls back to plain ORPort for simplicity (ExtORPort adds metadata framing
-    that is orthogonal to the transport itself).
+    falls back to plain ORPort for simplicity.
   • SMETHODS DONE is sent after all transports are initialised.
 """
 
@@ -45,7 +44,6 @@ def _split_addr(addr: str) -> tuple:
     Split "host:port" or "[ipv6]:port" into (host_str, port_int).
     """
     if addr.startswith('['):
-        # IPv6: "[::1]:9001"
         bracket_end = addr.index(']')
         host = addr[1:bracket_end]
         port = int(addr[bracket_end + 2:])
@@ -117,8 +115,6 @@ async def run_server(cfg: PTConfig) -> None:
         ipc.emit_env_error(f"Invalid OR port address {cfg.or_port!r}: {exc}")
         return
 
-    # Note: ExtORPort adds metadata framing (PT name, client IP) for Tor.
-    # We detect it but fall back gracefully to plain ORPort.
     if cfg.ext_or_port:
         log.info("ExtORPort configured (%s) — using plain ORPort instead "
                  "(ExtORPort framing not implemented)", cfg.ext_or_port)
@@ -128,7 +124,6 @@ async def run_server(cfg: PTConfig) -> None:
             log.info("Skipping unknown transport: %r", name)
             continue
 
-        # Determine bind address for this transport
         if name in cfg.bind_addrs:
             raw = cfg.bind_addrs[name]
             try:
@@ -158,6 +153,8 @@ async def run_server(cfg: PTConfig) -> None:
         log.info("Transport %r server listener ready at %s  (ORPort → %s:%d)",
                  name, listen_addr, or_host, or_port)
 
-        asyncio.get_event_loop().create_task(server.serve_forever())
+        # Use get_running_loop() — get_event_loop() is deprecated in a running
+        # async context as of Python 3.10 and may return the wrong loop.
+        asyncio.get_running_loop().create_task(server.serve_forever())
 
     ipc.emit_smethods_done()
