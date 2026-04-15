@@ -1,13 +1,7 @@
 #!/usr/bin/env bash
-# build.sh — build a Shadow-compatible single-file PT binary
 #
 # Prerequisites:
-#   Python 3.11+ (no external runtime deps needed — stdlib only)
-#   pip install pyinstaller
-#
-# Usage:
-#   chmod +x build.sh
-#   ./build.sh
+#   Python 3.11+
 #
 # Output:
 #   dist/pt_foobar   — standalone ELF binary, no Python installation needed

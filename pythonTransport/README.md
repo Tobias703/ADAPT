@@ -1,35 +1,8 @@
-# pt-python-dispatcher
-
-A **PT Spec 3.0**-compliant Pluggable Transport dispatcher written in pure Python (stdlib only).  
-Ships with the **`foobar`** demo transport and a clean factory for adding your own.
-
----
-
-## Architecture
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│  CLIENT SIDE                                                │
-│                                                             │
-│  Tor ──SOCKS5──► PT Client (socks5.py + pt_client.py)      │
-│                       │ TCP  encode(data) ──────────────────┼──► PT Server
-└───────────────────────┼─────────────────────────────────────┘    │
-                        │                                           │ decode
-┌───────────────────────┼─────────────────────────────────────┐    ▼
-│  SERVER SIDE          │                                     │  ORPort
-│                       │ TCP  encoded(data)                  │
-│  PT Server (pt_server.py) ──decode──► ORPort (Tor)          │
-│  PT Server (pt_server.py) ◄──encode── ORPort (Tor)          │
-└─────────────────────────────────────────────────────────────┘
-```
-
-IPC with the parent process (Tor) happens entirely over **stdout** using newline-terminated ASCII lines.
-
----
+# PT
 
 ## File layout
 
-```
+```txt
 pt_foobar/
 ├── main.py          Entry point, signal handling, stdin EOF watch
 ├── config.py        PT 3.0 CLI flags + PT 1.0 env var parser, version negotiation
@@ -51,7 +24,7 @@ pt_foobar/
 ## PT Spec compliance
 
 | Feature | Status |
-|---|---|
+| --- | --- |
 | Version negotiation (`-ptversion` / `TOR_PT_MANAGED_TRANSPORT_VER`) | ✅ |
 | PT 3.0 CLI flags | ✅ |
 | PT 1.0/2.0 env var fallback | ✅ |
@@ -69,30 +42,6 @@ pt_foobar/
 | SIGTERM → clean shutdown | ✅ |
 | PyInstaller single-binary (Shadow compatible) | ✅ |
 
----
-
-## Torrc configuration
-
-### Bridge (server side)
-
-```
-# torrc for the bridge relay
-ServerTransportPlugin foobar exec /path/to/dist/pt_foobar
-ServerTransportListenAddr foobar 0.0.0.0:4911
-ExtORPort auto
-```
-
-### Client side
-
-```
-# torrc for the Tor client
-UseBridges 1
-Bridge foobar <bridge_ip>:4911
-ClientTransportPlugin foobar exec /path/to/dist/pt_foobar
-```
-
----
-
 ## Running directly (for testing / Shadow)
 
 ### Server mode — environment variables (PT 1.0 / Tor style)
@@ -108,7 +57,8 @@ python3 main.py
 ```
 
 Expected stdout:
-```
+
+```sh
 VERSION 1
 STATUS TYPE=version IMPLEMENTATION=pt-python-dispatcher VERSION=1.0.0
 SMETHOD foobar 0.0.0.0:4911
@@ -199,25 +149,3 @@ from transports.mytransport import MyTransport  # noqa: F401
 
 That's it — the transport is automatically available.  
 Use it in torrc with `ServerTransportPlugin mytransport exec …`.
-
----
-
-## The foobar transport in Wireshark
-
-Capture traffic on the PT server port (default 4911) and apply the filter  
-`tcp.port == 4911`. Every payload will be pure printable ASCII:
-
-```
-666f6f626172666f6f626172...
-f o o b a r f o o b a r ...
-```
-
-Each group of 24 bytes represents one original plaintext byte.  
-It is immediately obvious this is not normal TLS — which is the point for a demo.
-
----
-
-## Dependencies
-
-**None.** Only Python 3.11+ standard library is used.  
-The `build.sh` script adds `pyinstaller` as a build-time dependency only.

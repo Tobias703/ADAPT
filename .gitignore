@@ -3,3 +3,4 @@ shadow.log
 .venv/*
 pythonTransport/build/*
 pythonTransport/dist/*
+**/__pycache__/**/*

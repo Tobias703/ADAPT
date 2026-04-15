@@ -66,10 +66,7 @@ src/
     client-torrc                    # Tor config for locally running the pluggable transport client.
     run-bridge.sh                   # A script for locally running the pluggable transport bridge.
     run-client.sh                   # A script for locally running the pluggable transport client.
-    main.rs                         # The main function for the code of a pluggable transport written in rust
 .gitignore
-Cargo.lock                          # For rust dependencies.
-Cargo.toml                          # Rust dependencies for the rust pluggable transport.
 mkdocs.yml                          # Config for the full documentation
 readme.md                           # Basic readme to get started
 requirements.txt                    # Python requirements for building the documentation using mkdocs
