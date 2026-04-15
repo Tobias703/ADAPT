@@ -74,21 +74,21 @@ hosts:
     ip_addr: 100.0.0.4
     network_node_id: 0
     processes:
-    - path: /usr/bin/tor # tor via pt
+    - path: ./shadow.data.template/tor_via_pt.sh # tor via pt
       args: --Address client --Nickname client --defaults-torrc torrc-defaults -f torrc
       environment:
         RUST_BACKTRACE: "1"
       start_time: 4m
       expected_final_state: running
-    - path: /usr/bin/tor # raw tor
+    - path: ./shadow.data.template/tor_direct.sh # direct tor
       args: --Address clientnopt --Nickname clientnopt --defaults-torrc torrc-defaults -f torrc-nopt
       start_time: 4m
       expected_final_state: running
-    - path: /usr/bin/curl # curl via pt
+    - path: ./shadow.data.template/curl_via_pt.sh # curl via pt
       args: ["--max-time", "60", "--socks5-hostname", "127.0.0.1:9052", "tinbkh6cadabugehfqjqydkd74heoifq2x4q2my44a5oi4546f4oklqd.onion"]
       start_time: 5m
       expected_final_state: {exited: 0}
-    - path: /usr/bin/curl # direct curl
+    - path: ./shadow.data.template/curl_direct.sh # direct curl
       args: ["--max-time", "60", "http://100.0.0.10:8080"]
       start_time: 5m
       expected_final_state: {exited: 28}
@@ -97,21 +97,21 @@ hosts:
     ip_addr: 100.0.0.3
     network_node_id: 0
     processes:
-    - path: /usr/bin/tor # tor via pt
+    - path: ./shadow.data.template/tor_via_pt.sh # tor via pt
       args: --Address client --Nickname client --defaults-torrc torrc-defaults -f torrc
       environment:
         RUST_BACKTRACE: "1"
       start_time: 4m
       expected_final_state: running
-    - path: /usr/bin/tor # raw tor
+    - path: ./shadow.data.template/tor_direct.sh # direct tor
       args: --Address clientnopt --Nickname clientnopt --defaults-torrc torrc-defaults -f torrc-nopt
       start_time: 4m
       expected_final_state: running
-    - path: /usr/bin/curl # curl via pt
+    - path: ./shadow.data.template/curl_via_pt.sh # curl via pt
       args: ["--max-time", "60", "--socks5-hostname", "127.0.0.1:9052", "tinbkh6cadabugehfqjqydkd74heoifq2x4q2my44a5oi4546f4oklqd.onion"]
       start_time: 5m
       expected_final_state: {exited: 0}
-    - path: /usr/bin/curl # direct curl
+    - path: ./shadow.data.template/curl_direct.sh # direct curl
       args: ["--max-time", "60", "http://100.0.0.10:8080"]
       start_time: 5m
       expected_final_state: {exited: 28}
@@ -132,7 +132,7 @@ hosts:
     network_node_id: 2
     processes:
     - path: /usr/bin/python3
-      args: -m http.server 8080
+      args: target_resource.py
       start_time: 5s
       expected_final_state: running
     - path: /usr/bin/tor # Tor hidden service

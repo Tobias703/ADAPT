@@ -10,4 +10,4 @@ SocksPort 127.0.0.1:9052
 
 ConfluxEnabled 0
 
-Log debug file ./tor-client-debug.log
+# Log debug file ./tor-client-debug.log

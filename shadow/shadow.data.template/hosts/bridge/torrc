@@ -19,4 +19,4 @@ SocksPort 0
 
 ContactInfo anonymous nobody@example.invalid
 
-Log debug file ./tor-bridge-debug.log
+# Log debug file ./tor-bridge-debug.log
