@@ -1,6 +1,6 @@
 /shadow/shadow.data/*
 shadow.log
 .venv/*
-pythonTransport/build/*
-pythonTransport/dist/*
+pythonPluggableTransport/build/*
+pythonPluggableTransport/dist/*
 **/__pycache__/**/*

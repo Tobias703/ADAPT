@@ -57,10 +57,10 @@ log = logging.getLogger('pt_dispatcher')
 # ── Register all bundled transports (side effect: @register decorators fire) ──
 import transports  # noqa: F401, E402
 
-from config import parse_config, IMPLEMENTATION_NAME, IMPLEMENTATION_VERSION
-from pt_client import run_client
-from pt_server import run_server
-import ipc
+from config import parse_config, IMPLEMENTATION_NAME, IMPLEMENTATION_VERSION # noqa: E402
+from pt_client import run_client # noqa: E402
+from pt_server import run_server # noqa: E402
+import ipc # noqa: E402
 
 
 # ──────────────────────────────────────────────────────────────────────────────

@@ -1,3 +1,4 @@
+
 """
 transports/foobar.py — The "foobar" demo transport
 

@@ -80,15 +80,23 @@ python3 main.py                     \
 ### Client mode — environment variables (PT 1.0 / Tor style)
 
 ```bash
-TOR_PT_STATE_LOCATION=/tmp/pt_state   \
 TOR_PT_MANAGED_TRANSPORT_VER=1        \
+TOR_PT_STATE_LOCATION=/tmp/pt_state   \
 TOR_PT_CLIENT_TRANSPORTS=foobar       \
 PT_LOG_LEVEL=DEBUG                    \
 python3 main.py
 ```
 
-Expected stdout:
+```bash
+export TOR_PT_MANAGED_TRANSPORT_VER=1
+export TOR_PT_STATE_LOCATION=/tmp/pt-state
+export TOR_PT_CLIENT_TRANSPORTS=obfs4
+export TOR_PT_EXIT_ON_STDIN_CLOSE=1
 ```
+
+Expected stdout:
+
+```bash
 VERSION 1
 STATUS TYPE=version IMPLEMENTATION=pt-python-dispatcher VERSION=1.0.0
 CMETHOD foobar socks5 127.0.0.1:<port>
@@ -144,7 +152,7 @@ class MyTransport(BaseTransport):
 Then add one import line to `transports/__init__.py`:
 
 ```python
-from transports.mytransport import MyTransport  # noqa: F401
+from transports.mytransport import MyTransport
 ```
 
 That's it — the transport is automatically available.  

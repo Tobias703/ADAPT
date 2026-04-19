@@ -33,10 +33,6 @@ from transport import BaseTransport, register
 log = logging.getLogger(__name__)
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Pre-computed encode table  (built once at import time)
-# ──────────────────────────────────────────────────────────────────────────────
-
 def _build_encode_table():
     """Return a 256-entry list where entry[i] is the 24-byte encoding of byte i."""
     table = []
@@ -60,10 +56,6 @@ _TOKEN_TO_BIT = {b'foo': 1, b'bar': 0}
 # Bytes per encoded byte on the wire
 _FRAME_SIZE = 24   # 8 bits × 3 bytes
 
-
-# ──────────────────────────────────────────────────────────────────────────────
-# Transport class
-# ──────────────────────────────────────────────────────────────────────────────
 
 @register
 class FoobarTransport(BaseTransport):
