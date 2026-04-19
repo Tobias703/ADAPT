@@ -17,15 +17,19 @@ from config import PTConfig
 log = logging.getLogger(__name__)
 
 
-async def _handle_connection(client_reader: asyncio.StreamReader, client_writer: asyncio.StreamWriter, transport_name: str) -> None:
+async def _handle_connection(
+    client_reader: asyncio.StreamReader,
+    client_writer: asyncio.StreamWriter,
+    transport_name: str,
+) -> None:
     # Handle one inbound SOCKS5 connection from Tor.
     # Steps:
     #   1. Complete SOCKS5 handshake (supports method 0x00 and 0x09)
     #   2. Open TCP connection to the PT server (host:port from SOCKS5 CONNECT)
     #   3. Send SOCKS5 success reply to Tor
     #   4. Bidirectional relay: encode Tor->server, decode server->Tor
-    
-    peer = client_writer.get_extra_info('peername', ('?', 0))
+
+    peer = client_writer.get_extra_info("peername", ("?", 0))
     log.debug("[%s] client connection -> transport=%s", peer, transport_name)
 
     # SOCKS5 handshake
@@ -40,7 +44,9 @@ async def _handle_connection(client_reader: asyncio.StreamReader, client_writer:
     try:
         srv_reader, srv_writer = await asyncio.open_connection(host, port)
     except OSError as exc:
-        log.warning("[%s] Cannot connect to PT server %s:%d - %s", peer, host, port, exc)
+        log.warning(
+            "[%s] Cannot connect to PT server %s:%d - %s", peer, host, port, exc
+        )
         await socks5.send_failure(client_writer, socks5.REP_CONN_REFUSED)
         return
 
@@ -51,18 +57,32 @@ async def _handle_connection(client_reader: asyncio.StreamReader, client_writer:
     transport = transport_mod.create(transport_name)
 
     # Relay with transform
-    await relay_mod.relay(client_reader, client_writer, srv_reader, srv_writer, a_to_b_fn=transport.encode, a_to_b_is_decode=False, b_to_a_fn=transport.decode, b_to_a_is_decode=True,)
+    await relay_mod.relay(
+        client_reader,
+        client_writer,
+        srv_reader,
+        srv_writer,
+        a_to_b_fn=transport.encode,
+        a_to_b_is_decode=False,
+        b_to_a_fn=transport.decode,
+        b_to_a_is_decode=True,
+    )
     log.debug("[%s] relay finished", peer)
 
 
 async def run_client(cfg: PTConfig) -> None:
     # Start one SOCKS5 listener per requested transport and emit CMETHOD lines.
     # After all transports are (attempted to be) started, emit CMETHODS DONE.
-    
+
     # Upstream proxy
     if cfg.upstream_proxy:
-        log.warning("Upstream proxy configured (%s) but not supported; aborting", cfg.upstream_proxy)
-        ipc.emit_proxy_error("upstream proxy chaining not supported by this implementation")
+        log.warning(
+            "Upstream proxy configured (%s) but not supported; aborting",
+            cfg.upstream_proxy,
+        )
+        ipc.emit_proxy_error(
+            "upstream proxy chaining not supported by this implementation"
+        )
         return
 
     for name in cfg.transports:
@@ -73,7 +93,11 @@ async def run_client(cfg: PTConfig) -> None:
 
         try:
             # port=0 -> let OS pick a free port
-            server = await asyncio.start_server(lambda r, w, n=name: _handle_connection(r, w, n), host='127.0.0.1', port=0)                
+            server = await asyncio.start_server(
+                lambda r, w, n=name: _handle_connection(r, w, n),
+                host="127.0.0.1",
+                port=0,
+            )
         except OSError as exc:
             ipc.emit_cmethod_error(name, str(exc))
             log.error("Failed to start SOCKS5 listener for %r: %s", name, exc)

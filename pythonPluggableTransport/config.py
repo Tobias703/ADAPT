@@ -33,7 +33,7 @@ class PTConfig:
     transports: List[str]
 
     # Client-only
-    upstream_proxy: Optional[str] = None   # e.g. "socks5://127.0.0.1:9050"
+    upstream_proxy: Optional[str] = None  # e.g. "socks5://127.0.0.1:9050"
 
     # Server-only
     # "host:port" of ORPort
@@ -51,7 +51,7 @@ class PTConfig:
 def _negotiate_version(versions_str: str) -> Optional[str]:
     # PT versions are sent via a comma-separated supported-versions string.
     # This function returns either the best mutually supported version or 'None'.
-    parent = {v.strip() for v in versions_str.split(',') if v.strip()}
+    parent = {v.strip() for v in versions_str.split(",") if v.strip()}
     for v in SUPPORTED_VERSIONS:
         if v in parent:
             return v
@@ -63,15 +63,15 @@ def _parse_bindaddr(raw: str) -> Dict[str, str]:
     # Format: "transport1-host:port,transport2-host:port,…"
     # The transport name ends at the first '-'.
     result: Dict[str, str] = {}
-    for token in raw.split(','):
+    for token in raw.split(","):
         token = token.strip()
         if not token:
             continue
-        dash = token.find('-')
+        dash = token.find("-")
         if dash == -1:
             continue
         name = token[:dash]
-        addr = token[dash + 1:]
+        addr = token[dash + 1 :]
         result[name] = addr
     return result
 
@@ -88,47 +88,57 @@ def _parse_server_transport_options(raw: str) -> Dict[str, str]:
     segments = []
     while i < len(raw):
         c = raw[i]
-        if c == '\\' and i + 1 < len(raw):
+        if c == "\\" and i + 1 < len(raw):
             current.append(raw[i + 1])
             i += 2
-        elif c == ';':
-            segments.append(''.join(current))
+        elif c == ";":
+            segments.append("".join(current))
             current = []
             i += 1
         else:
             current.append(c)
             i += 1
     if current:
-        segments.append(''.join(current))
+        segments.append("".join(current))
     for seg in segments:
-        colon = seg.find(':')
+        colon = seg.find(":")
         if colon == -1:
             continue
-        result[seg[:colon]] = seg[colon + 1:]
+        result[seg[:colon]] = seg[colon + 1 :]
     return result
 
 
 def parse_config() -> PTConfig:
     # Parse PT configuration and perform version negotiation.
     # Writes VERSION / VERSION-ERROR / ENV-ERROR to stdout and may sys.exit(1).
-    
+
     # 1. Parse CLI flags (PT 3.0)
     parser = argparse.ArgumentParser(add_help=False)
-    parser.add_argument('-ptversion', default=None)
-    parser.add_argument('-state', default=None)
-    parser.add_argument('-transports', default=None)
-    parser.add_argument('-proxy', default=None)
-    parser.add_argument('-bindaddr', default=None)
-    parser.add_argument('-orport', default=None)
-    parser.add_argument('-extorport', default=None)
-    parser.add_argument('-options', default=None)
-    parser.add_argument('-optionsFile', default=None)
-    parser.add_argument('-mode', default=None, choices=['client', 'server', 'transparent-TCP', 'STUN-aware-UDP', 'transparent-UDP'])
+    parser.add_argument("-ptversion", default=None)
+    parser.add_argument("-state", default=None)
+    parser.add_argument("-transports", default=None)
+    parser.add_argument("-proxy", default=None)
+    parser.add_argument("-bindaddr", default=None)
+    parser.add_argument("-orport", default=None)
+    parser.add_argument("-extorport", default=None)
+    parser.add_argument("-options", default=None)
+    parser.add_argument("-optionsFile", default=None)
+    parser.add_argument(
+        "-mode",
+        default=None,
+        choices=[
+            "client",
+            "server",
+            "transparent-TCP",
+            "STUN-aware-UDP",
+            "transparent-UDP",
+        ],
+    )
     args, _ = parser.parse_known_args()
 
     # 2. Version negotiation
     # PT 3.0: -ptversion flag; PT 1.0/2.0: TOR_PT_MANAGED_TRANSPORT_VER env var
-    versions_raw = (args.ptversion or os.environ.get('TOR_PT_MANAGED_TRANSPORT_VER'))
+    versions_raw = args.ptversion or os.environ.get("TOR_PT_MANAGED_TRANSPORT_VER")
 
     if versions_raw:
         ver = _negotiate_version(versions_raw)
@@ -143,56 +153,73 @@ def parse_config() -> PTConfig:
         protocol_version = "1.0"
 
     # 3. State directory
-    state_dir = (args.state or os.environ.get('TOR_PT_STATE_LOCATION', '/tmp/pt_state'))
+    state_dir = args.state or os.environ.get("TOR_PT_STATE_LOCATION", "/tmp/pt_state")
     os.makedirs(state_dir, exist_ok=True)
 
     # 4. Determine mode
     mode = args.mode
     if not mode:
-        if os.environ.get('TOR_PT_CLIENT_TRANSPORTS'):
-            mode = 'client'
-        elif os.environ.get('TOR_PT_SERVER_TRANSPORTS'):
-            mode = 'server'
+        if os.environ.get("TOR_PT_CLIENT_TRANSPORTS"):
+            mode = "client"
+        elif os.environ.get("TOR_PT_SERVER_TRANSPORTS"):
+            mode = "server"
         else:
-            ipc.emit_env_error("Cannot determine mode: set -mode or TOR_PT_CLIENT/SERVER_TRANSPORTS")
+            ipc.emit_env_error(
+                "Cannot determine mode: set -mode or TOR_PT_CLIENT/SERVER_TRANSPORTS"
+            )
             sys.exit(1)
-    if mode not in ('client', 'server'):
+    if mode not in ("client", "server"):
         ipc.emit_env_error(f"Mode '{mode}' is not supported by this implementation")
         sys.exit(1)
 
     # 5. Transports
     if args.transports:
-        transports = [t.strip() for t in args.transports.split(',') if t.strip()]
-    elif mode == 'client' and os.environ.get('TOR_PT_CLIENT_TRANSPORTS'):
-        transports = [t.strip() for t in os.environ['TOR_PT_CLIENT_TRANSPORTS'].split(',') if t.strip()]
-    elif mode == 'server' and os.environ.get('TOR_PT_SERVER_TRANSPORTS'):
-        transports = [t.strip() for t in os.environ['TOR_PT_SERVER_TRANSPORTS'].split(',') if t.strip()]
+        transports = [t.strip() for t in args.transports.split(",") if t.strip()]
+    elif mode == "client" and os.environ.get("TOR_PT_CLIENT_TRANSPORTS"):
+        transports = [
+            t.strip()
+            for t in os.environ["TOR_PT_CLIENT_TRANSPORTS"].split(",")
+            if t.strip()
+        ]
+    elif mode == "server" and os.environ.get("TOR_PT_SERVER_TRANSPORTS"):
+        transports = [
+            t.strip()
+            for t in os.environ["TOR_PT_SERVER_TRANSPORTS"].split(",")
+            if t.strip()
+        ]
     else:
         ipc.emit_env_error("No transports specified")
         sys.exit(1)
 
     # 6. Build config object
-    cfg = PTConfig(mode=mode, protocol_version=protocol_version, state_dir=state_dir, transports=transports)
+    cfg = PTConfig(
+        mode=mode,
+        protocol_version=protocol_version,
+        state_dir=state_dir,
+        transports=transports,
+    )
 
     # 7. Client extras
-    if mode == 'client':
-        cfg.upstream_proxy = args.proxy or os.environ.get('TOR_PT_PROXY')
+    if mode == "client":
+        cfg.upstream_proxy = args.proxy or os.environ.get("TOR_PT_PROXY")
 
     # 8. Server extras
-    if mode == 'server':
-        or_port = args.orport or os.environ.get('TOR_PT_ORPORT')
+    if mode == "server":
+        or_port = args.orport or os.environ.get("TOR_PT_ORPORT")
         if not or_port:
             ipc.emit_env_error("Server mode requires -orport / TOR_PT_ORPORT")
             sys.exit(1)
         cfg.or_port = or_port
 
-        cfg.ext_or_port = args.extorport or os.environ.get('TOR_PT_EXTENDED_SERVER_PORT')
+        cfg.ext_or_port = args.extorport or os.environ.get(
+            "TOR_PT_EXTENDED_SERVER_PORT"
+        )
 
-        bind_raw = (args.bindaddr or os.environ.get('TOR_PT_SERVER_BINDADDR', ''))
+        bind_raw = args.bindaddr or os.environ.get("TOR_PT_SERVER_BINDADDR", "")
         if bind_raw:
             cfg.bind_addrs = _parse_bindaddr(bind_raw)
 
-        opts_raw = os.environ.get('TOR_PT_SERVER_TRANSPORT_OPTIONS', '')
+        opts_raw = os.environ.get("TOR_PT_SERVER_TRANSPORT_OPTIONS", "")
         if opts_raw:
             cfg.server_options = _parse_server_transport_options(opts_raw)
 

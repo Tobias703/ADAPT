@@ -28,7 +28,7 @@ import ipc
 import transports  # noqa: F401
 
 # Force unbuffered binary stdout
-if hasattr(sys.stdout, 'reconfigure'):
+if hasattr(sys.stdout, "reconfigure"):
     stdout = cast(io.TextIOWrapper, sys.stdout)
     try:
         stdout.reconfigure(line_buffering=True)
@@ -36,14 +36,14 @@ if hasattr(sys.stdout, 'reconfigure'):
         pass
 
 # Logging goes to stderr (stdout is reserved for PT IPC)
-_log_level_name = os.environ.get('PT_LOG_LEVEL', 'WARNING').upper()
+_log_level_name = os.environ.get("PT_LOG_LEVEL", "WARNING").upper()
 logging.basicConfig(
     stream=sys.stderr,
     level=getattr(logging, _log_level_name, logging.WARNING),
-    format='%(asctime)s %(levelname)-8s %(name)s: %(message)s',
-    datefmt='%H:%M:%S',
+    format="%(asctime)s %(levelname)-8s %(name)s: %(message)s",
+    datefmt="%H:%M:%S",
 )
-log = logging.getLogger('ppt_dispatcher')
+log = logging.getLogger("ppt_dispatcher")
 
 
 async def _async_main() -> None:
@@ -53,10 +53,15 @@ async def _async_main() -> None:
     # Announce our software version (informational; parent will most likely ignore)
     ipc.emit_status_version(IMPLEMENTATION_NAME, IMPLEMENTATION_VERSION)
 
-    log.info("PPT dispatcher starting  mode=%s  transports=%s  protocol=%s", cfg.mode, cfg.transports, cfg.protocol_version)
+    log.info(
+        "PPT dispatcher starting  mode=%s  transports=%s  protocol=%s",
+        cfg.mode,
+        cfg.transports,
+        cfg.protocol_version,
+    )
 
     # Start transport listeners
-    if cfg.mode == 'client':
+    if cfg.mode == "client":
         await run_client(cfg)
     else:
         await run_server(cfg)
@@ -107,5 +112,5 @@ def main() -> None:
     asyncio.run(_async_main())
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

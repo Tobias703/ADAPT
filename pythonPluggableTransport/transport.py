@@ -29,7 +29,7 @@ class BaseTransport(ABC):
     @abstractmethod
     def decode(self, buf: bytes) -> Tuple[bytes, bytes]:
         # Transform incoming wire bytes back to plaintext.
-        
+
         # Contract:
         #   - May return partial output when 'buf' ends mid-frame.
         #   - Returns (decoded_output, remaining_buf) where 'remaining_buf' contains any bytes that could not yet form a complete frame.
@@ -49,7 +49,7 @@ def register(cls: Type[BaseTransport]) -> Type[BaseTransport]:
     #     class MyTransport(BaseTransport):
     #         name = "mytransport"
     #         …
-    
+
     if not cls.name:
         raise ValueError(
             f"Transport class {cls.__name__!r} must define a non-empty 'name' attribute"
@@ -63,7 +63,7 @@ def create(name: str, **kwargs) -> BaseTransport:
 
     # Raises KeyError if the name is not registered.
     # kwargs are forwarded to the transport constructor (useful for options).
-    
+
     if name not in _REGISTRY:
         raise KeyError(f"Unknown transport: {name!r}  (registered: {list(_REGISTRY)})")
     return _REGISTRY[name](**kwargs)

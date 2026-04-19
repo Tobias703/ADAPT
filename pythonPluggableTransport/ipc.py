@@ -23,7 +23,7 @@ def _emit(line: str) -> None:
     # Write one IPC line to stdout, thread-safely, with immediate flush
     with _lock:
         # Write as bytes so we bypass any text-mode buffering subtleties
-        sys.stdout.buffer.write((line + '\n').encode('ascii'))
+        sys.stdout.buffer.write((line + "\n").encode("ascii"))
         sys.stdout.buffer.flush()
 
 
@@ -76,9 +76,11 @@ def emit_smethod(transport: str, addr: str, args: dict | None = None) -> None:
     # args  = optional per-transport key/value pairs forwarded in Bridge line
     line = f"SMETHOD {transport} {addr}"
     if args:
+
         def _escape(s: str) -> str:
-            return s.replace('\\', '\\\\').replace('=', '\\=').replace(',', '\\,')
-        args_str = ','.join(f"{_escape(k)}={_escape(v)}" for k, v in args.items())
+            return s.replace("\\", "\\\\").replace("=", "\\=").replace(",", "\\,")
+
+        args_str = ",".join(f"{_escape(k)}={_escape(v)}" for k, v in args.items())
         line += f" ARGS:{args_str}"
     _emit(line)
 
@@ -97,8 +99,8 @@ def emit_smethods_done() -> None:
 def emit_log(severity: str, message: str) -> None:
     # Send a human-readable log message to the parent process with possible options for severity being: error, warning, notice, info, debug
     # CString-quote the message if it contains whitespace or quotes
-    if any(c in message for c in (' ', '\t', '"')):
-        message = '"' + message.replace('\\', '\\\\').replace('"', '\\"') + '"'
+    if any(c in message for c in (" ", "\t", '"')):
+        message = '"' + message.replace("\\", "\\\\").replace('"', '\\"') + '"'
     _emit(f"LOG SEVERITY={severity} MESSAGE={message}")
 
 
