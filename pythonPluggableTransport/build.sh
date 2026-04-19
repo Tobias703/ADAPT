@@ -4,7 +4,7 @@
 #   Python 3.11+
 #
 # Output:
-#   dist/pt_foobar   — standalone ELF binary, no Python installation needed
+#   dist/ppt   - standalone ELF binary, no Python installation needed
 
 set -euo pipefail
 
@@ -21,21 +21,7 @@ echo "==> Building single-file binary"
 pyinstaller \
     --clean \
     --noconfirm \
-    pt_foobar.spec
+    ppt.spec
 
 echo ""
-echo "✓ Build complete:  dist/pt_foobar"
-echo ""
-echo "Quick smoke test (server mode):"
-echo "  TOR_PT_STATE_LOCATION=/tmp/pt_state \\"
-echo "  TOR_PT_MANAGED_TRANSPORT_VER=1 \\"
-echo "  TOR_PT_SERVER_TRANSPORTS=foobar \\"
-echo "  TOR_PT_SERVER_BINDADDR=foobar-127.0.0.1:4911 \\"
-echo "  TOR_PT_ORPORT=127.0.0.1:9001 \\"
-echo "  ./dist/pt_foobar"
-echo ""
-echo "Quick smoke test (client mode):"
-echo "  TOR_PT_STATE_LOCATION=/tmp/pt_state \\"
-echo "  TOR_PT_MANAGED_TRANSPORT_VER=1 \\"
-echo "  TOR_PT_CLIENT_TRANSPORTS=foobar \\"
-echo "  ./dist/pt_foobar"
+echo "Build complete:  dist/ppt"

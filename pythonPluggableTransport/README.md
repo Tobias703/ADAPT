@@ -4,19 +4,19 @@
 
 ```txt
 pt_foobar/
-├── main.py          Entry point, signal handling, stdin EOF watch
-├── config.py        PT 3.0 CLI flags + PT 1.0 env var parser, version negotiation
-├── ipc.py           All stdout IPC messages (VERSION, CMETHOD, SMETHOD, LOG, …)
-├── socks5.py        Async RFC 1928 SOCKS5 server; auth methods 0x00 and 0x09
-├── relay.py         Bidirectional async relay with encode/decode pump tasks
-├── transport.py     BaseTransport ABC + @register decorator + factory
-├── pt_client.py     Client-mode dispatcher (SOCKS5 → encode → TCP)
-├── pt_server.py     Server-mode dispatcher (TCP → decode → ORPort)
-├── transports/
-│   ├── __init__.py  Imports all bundled transports (triggers @register)
-│   └── foobar.py   Demo: bit 1 → "foo", bit 0 → "bar"  (1:24 expansion)
-├── pt_foobar.spec   PyInstaller build spec
-└── build.sh         One-step binary build script
+├-- main.py          Entry point, signal handling, stdin EOF watch
+├-- config.py        PT 3.0 CLI flags + PT 1.0 env var parser, version negotiation
+├-- ipc.py           All stdout IPC messages (VERSION, CMETHOD, SMETHOD, LOG, …)
+├-- socks5.py        Async RFC 1928 SOCKS5 server; auth methods 0x00 and 0x09
+├-- relay.py         Bidirectional async relay with encode/decode pump tasks
+├-- transport.py     BaseTransport ABC + @register decorator + factory
+├-- pt_client.py     Client-mode dispatcher (SOCKS5 -> encode -> TCP)
+├-- pt_server.py     Server-mode dispatcher (TCP -> decode -> ORPort)
+├-- transports/
+│   ├-- __init__.py  Imports all bundled transports (triggers @register)
+│   └-- foobar.py   Demo: bit 1 -> "foo", bit 0 -> "bar"  (1:24 expansion)
+├-- pt_foobar.spec   PyInstaller build spec
+└-- build.sh         One-step binary build script
 ```
 
 ---
@@ -38,13 +38,13 @@ pt_foobar/
 | `STATUS TYPE=version …` | ✅ |
 | SOCKS5 auth method 0x00 (no auth) | ✅ |
 | SOCKS5 auth method 0x09 (JSON Parameter Block, IANA PT) | ✅ |
-| stdin EOF → clean shutdown | ✅ |
-| SIGTERM → clean shutdown | ✅ |
+| stdin EOF -> clean shutdown | ✅ |
+| SIGTERM -> clean shutdown | ✅ |
 | PyInstaller single-binary (Shadow compatible) | ✅ |
 
 ## Running directly (for testing / Shadow)
 
-### Server mode — environment variables (PT 1.0 / Tor style)
+### Server mode - environment variables (PT 1.0 / Tor style)
 
 ```bash
 TOR_PT_STATE_LOCATION=/tmp/pt_state          \
@@ -65,7 +65,7 @@ SMETHOD foobar 0.0.0.0:4911
 SMETHODS DONE
 ```
 
-### Server mode — CLI flags (PT 3.0)
+### Server mode - CLI flags (PT 3.0)
 
 ```bash
 python3 main.py                     \
@@ -77,7 +77,7 @@ python3 main.py                     \
   -orport 127.0.0.1:9001
 ```
 
-### Client mode — environment variables (PT 1.0 / Tor style)
+### Client mode - environment variables (PT 1.0 / Tor style)
 
 ```bash
 TOR_PT_MANAGED_TRANSPORT_VER=1        \
@@ -136,7 +136,7 @@ from transport import BaseTransport, register
 
 @register
 class MyTransport(BaseTransport):
-    """XOR every byte with a fixed key — simple demo."""
+    # XOR every byte with a fixed key - simple demo
 
     name = "mytransport"          # ← wire name used in torrc / IPC
     KEY  = 0x42
@@ -155,5 +155,5 @@ Then add one import line to `transports/__init__.py`:
 from transports.mytransport import MyTransport
 ```
 
-That's it — the transport is automatically available.  
+That's it - the transport is automatically available.  
 Use it in torrc with `ServerTransportPlugin mytransport exec …`.

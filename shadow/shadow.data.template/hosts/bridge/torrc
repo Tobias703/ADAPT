@@ -6,7 +6,7 @@ PublishServerDescriptor 0
 BridgeDistribution none
 
 ServerTransportPlugin obfs4 exec ../../../lyrebird
-ServerTransportPlugin foobar exec ../../../foobar
+ServerTransportPlugin foobar exec ../../../ppt
 ServerTransportListenAddr foobar 100.0.0.10:1235
 ServerTransportListenAddr obfs4 100.0.0.10:1234
 BridgeRelay 1

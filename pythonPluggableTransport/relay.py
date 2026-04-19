@@ -1,24 +1,20 @@
-"""
-relay.py — Bidirectional async relay with pluggable encode/decode transforms
+# The relay manages two concurrent pump tasks:
 
-The relay manages two concurrent pump tasks:
+#   A -encode> B (plain output; no buffering needed)
+#   B -decode> A (framed output; partial frames are buffered)
 
-  A ──encode──► B      (plain output; no buffering needed)
-  B ──decode──► A      (framed output; partial frames are buffered)
+# For the PT client:
+#   A = Tor side (SOCKS5 client), B = PT server side
+#   A->B: encode plaintext before sending to server
+#   B->A: decode ciphertext arriving from server
 
-For the PT client:
-  A = Tor side (SOCKS5 client),  B = PT server side
-  A→B: encode plaintext before sending to server
-  B→A: decode ciphertext arriving from server
+# For the PT server:
+#   A = PT client side, B = ORPort side
+#   A->B: decode ciphertext arriving from PT client
+#   B->A: encode plaintext before sending back to PT client
 
-For the PT server:
-  A = PT client side,             B = ORPort side
-  A→B: decode ciphertext arriving from PT client
-  B→A: encode plaintext before sending back to PT client
-
-The caller chooses which direction uses encode and which uses decode by
-passing the appropriate callables; the relay itself is direction-agnostic.
-"""
+# The caller chooses which direction uses encode and which uses decode by
+# passing the appropriate callables; the relay itself is direction-agnostic.
 
 import asyncio
 import logging
@@ -29,19 +25,11 @@ log = logging.getLogger(__name__)
 CHUNK = 65536   # bytes per read() call
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Internal helpers
-# ──────────────────────────────────────────────────────────────────────────────
-
 async def _close_writer(writer: asyncio.StreamWriter) -> None:
-    """
-    Flush any buffered output, then close the writer.
+    # Flush any buffered output, then close the writer.
 
-    Calling writer.close() without a prior drain() can silently drop data
-    that has been write()-buffered but not yet handed to the kernel.  We
-    drain first, tolerating any error (the peer may already be gone), then
-    close and wait for the underlying transport to finish its teardown.
-    """
+    # Calling writer.close() without a prior drain() can silently drop data that has been write()-buffered but not yet handed to the kernel. We drain first, tolerating any error (the peer may already be gone), then close and wait for the underlying transport to finish its teardown.
+    
     try:
         await writer.drain()
     except Exception:
@@ -54,12 +42,8 @@ async def _close_writer(writer: asyncio.StreamWriter) -> None:
         pass
 
 
-async def _pump_encode(
-    reader: asyncio.StreamReader,
-    writer: asyncio.StreamWriter,
-    encode_fn: Callable[[bytes], bytes],
-) -> None:
-    """Pump bytes from reader to writer, passing each chunk through encode_fn."""
+async def _pump_encode(reader: asyncio.StreamReader, writer: asyncio.StreamWriter, encode_fn: Callable[[bytes], bytes]) -> None:
+    # Pump bytes from reader to writer, passing each chunk through encode_fn
     try:
         while True:
             chunk = await reader.read(CHUNK)
@@ -76,19 +60,11 @@ async def _pump_encode(
         await _close_writer(writer)
 
 
-async def _pump_decode(
-    reader: asyncio.StreamReader,
-    writer: asyncio.StreamWriter,
-    decode_fn: Callable[[bytes], Tuple[bytes, bytes]],
-) -> None:
-    """
-    Pump bytes from reader to writer, passing the accumulated buffer through
-    decode_fn which may return partial output.
-
-    decode_fn(buf) → (decoded_bytes, remaining_buf)
-    remaining_buf is fed into the next decode call so no frame boundaries
-    are ever lost between read() calls.
-    """
+async def _pump_decode(reader: asyncio.StreamReader, writer: asyncio.StreamWriter, decode_fn: Callable[[bytes], Tuple[bytes, bytes]],) -> None:
+    # Pump bytes from reader to writer, passing the accumulated buffer through decode_fn which may return partial output.
+    # decode_fn(buf) -> (decoded_bytes, remaining_buf)
+    # remaining_buf is fed into the next decode call so no frame boundaries are ever lost between read() calls.
+    
     buf = b''
     try:
         while True:
@@ -110,52 +86,21 @@ async def _pump_decode(
         await _close_writer(writer)
 
 
-# ──────────────────────────────────────────────────────────────────────────────
-# Public API
-# ──────────────────────────────────────────────────────────────────────────────
+# a_to_b_fn -> en-/decode function for direction A -> B
+# a_to_b_is_decode -> if true, then a_to_b_fn is a decode function
+# b_to_a_fn -> en-/decode function for direction B -> A
+# b_to_a_is_decode -> if true, then b_to_a_fn is a decode function
+async def relay(a_reader: asyncio.StreamReader, a_writer: asyncio.StreamWriter, b_reader: asyncio.StreamReader, b_writer: asyncio.StreamWriter, *, a_to_b_fn: Callable, a_to_b_is_decode: bool = False, b_to_a_fn: Callable, b_to_a_is_decode: bool = False) -> None:
+    # Run two pump tasks concurrently until both sides close.
+    # Each pump closes its writer in its finally block, which propagates an EOF to the peer's reader, causing the other pump to exit naturally. Just wait for ALL_COMPLETED: there is no need to cancel either task because they will both terminate once the underlying connections close.
+    # Using FIRST_COMPLETED here would not work: when one pump finishes (e.g. the ORPort closes after sending its response), the other pump would be cancelled before it could forward the in-flight reply, producing empty packets on the wire.
 
-async def relay(
-    a_reader: asyncio.StreamReader,
-    a_writer: asyncio.StreamWriter,
-    b_reader: asyncio.StreamReader,
-    b_writer: asyncio.StreamWriter,
-    *,
-    a_to_b_fn: Callable,                    # encode_fn OR decode_fn for A→B direction
-    a_to_b_is_decode: bool = False,         # True → a_to_b_fn is a decode_fn
-    b_to_a_fn: Callable,                    # encode_fn OR decode_fn for B→A direction
-    b_to_a_is_decode: bool = False,         # True → b_to_a_fn is a decode_fn
-) -> None:
-    """
-    Run two pump tasks concurrently until **both** sides close.
+    # Typical usage for PT client mode::
+    #     await relay(tor_reader, tor_writer, srv_reader, srv_writer, a_to_b_fn=transport.encode,   a_to_b_is_decode=False, b_to_a_fn=transport.decode,   b_to_a_is_decode=True)
 
-    Each pump closes its writer in its finally block, which propagates an EOF
-    to the peer's reader, causing the other pump to exit naturally.  We
-    therefore wait for ALL_COMPLETED: there is no need to cancel either task
-    because they will both terminate once the underlying connections close.
+    # Typical usage for PT server mode::
+    #     await relay(client_reader, client_writer, or_reader, or_writer, a_to_b_fn=transport.decode, a_to_b_is_decode=True, b_to_a_fn=transport.encode, b_to_a_is_decode=False)
 
-    Using FIRST_COMPLETED here would be a bug: when one pump finishes (e.g.
-    the ORPort closes after sending its response), the other pump would be
-    cancelled before it could forward the in-flight reply, producing empty
-    packets on the wire.
-
-    Typical usage for PT client mode::
-
-        await relay(
-            tor_reader, tor_writer,
-            srv_reader, srv_writer,
-            a_to_b_fn=transport.encode,   a_to_b_is_decode=False,
-            b_to_a_fn=transport.decode,   b_to_a_is_decode=True,
-        )
-
-    Typical usage for PT server mode::
-
-        await relay(
-            client_reader, client_writer,
-            or_reader,     or_writer,
-            a_to_b_fn=transport.decode,   a_to_b_is_decode=True,
-            b_to_a_fn=transport.encode,   b_to_a_is_decode=False,
-        )
-    """
     pump_a_b = (
         _pump_decode(a_reader, b_writer, a_to_b_fn)
         if a_to_b_is_decode
@@ -171,12 +116,8 @@ async def relay(
     task_b_a = asyncio.create_task(pump_b_a)
 
     # Wait for BOTH pumps to finish.
-    #
-    # Half-close propagation guarantees termination without an explicit cancel:
-    #   • When A closes, pump_a_b exits and calls _close_writer(b_writer).
-    #   • B sees EOF on its read side, finishes processing, and closes.
-    #   • pump_b_a reads EOF from b_reader, exits, and calls _close_writer(a_writer).
-    #   • Both tasks are now done.
+
+    # Half-close propagation guarantees termination without an explicit cancellation
     await asyncio.wait(
         [task_a_b, task_b_a],
         return_when=asyncio.ALL_COMPLETED,

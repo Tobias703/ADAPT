@@ -1,14 +1,10 @@
-# pt_foobar.spec — PyInstaller build specification
-#
+# PyInstaller build specification
+
 # Produces a single-file ELF binary that bundles CPython and all modules.
-# Shadow runs real ELF binaries, so this lets the PT work in a Shadow
-# simulation without requiring Python to be installed in the simulation.
-#
-# Build:
-#   pip install pyinstaller
-#   pyinstaller pt_foobar.spec
-#
-# Output:  dist/pt_foobar   (single ELF, ~7–12 MB)
+
+# Build with the 'build.sh' script
+
+# Output:  dist/pt_foobar
 
 import sys
 from pathlib import Path
@@ -53,14 +49,14 @@ exe = EXE(
     a.zipfiles,
     a.datas,
     [],
-    name='pt_foobar',
+    name='ppt',
     debug=False,
     bootloader_ignore_signals=False,
     strip=True,
-    upx=False,          # UPX can confuse Shadow's ELF loader; leave off
+    upx=False,
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=True,       # PT is a console app (no GUI)
+    console=True,
     disable_windowed_traceback=False,
     target_arch=None,
     codesign_identity=None,

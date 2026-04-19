@@ -1,28 +1,26 @@
-"""
-Run Tests: python3 test_pt.py -t <transport_name>
+# Run Tests: python3 test_pt.py -t <transport_name>
 
-Tests:
-  Unit - Transport Interface
-    encode / decode roundtrip (single byte, multi-byte, all 256 values)
-    empty-input contract  encode(b'') == b''  decode(b'') == (b'', b'')
+# Tests:
+#   Unit - Transport Interface
+#     encode / decode roundtrip (single byte, multi-byte, all 256 values)
+#     empty-input contract  encode(b'') == b''  decode(b'') == (b'', b'')
 
-  IPC stdout (PT spec compliance)
-    server mode: VERSION  SMETHOD <name>  SMETHODS DONE emitted in order
-    client mode: VERSION  CMETHOD <name> socks5 <addr>  CMETHODS DONE in order
-    no error lines (ENV-ERROR / VERSION-ERROR / CMETHOD-ERROR / SMETHOD-ERROR)
-    unknown transport silently skipped - no *-ERROR line, DONE still emitted
-    missing ORPort in server mode -> ENV-ERROR and non-zero exit
+#   IPC stdout (PT spec compliance)
+#     server mode: VERSION; SMETHOD <name>; SMETHODS DONE emitted in order
+#     client mode: VERSION; CMETHOD <name>; socks5 <addr>; CMETHODS DONE in order
+#     no error lines (ENV-ERROR / VERSION-ERROR / CMETHOD-ERROR / SMETHOD-ERROR)
+#     unknown transport silently skipped - no *-ERROR line, DONE still emitted
+#     missing ORPort in server mode -> ENV-ERROR and non-zero exit
 
-  Lifecycle
-    SIGTERM -> clean exit (code 0 or -SIGTERM)
-    stdin EOF -> clean exit
+#   Lifecycle
+#     SIGTERM -> clean exit (code 0 or -SIGTERM)
+#     stdin EOF -> clean exit
 
-  End-to-end data flow  (requires both PT processes + mock ORPort)
-    client -> server direction: data sent via SOCKS5 arrives plain at mock ORPort
-    server -> client direction: data from mock ORPort arrives plain at SOCKS5 client
-    bidirectional simultaneous transfer
-    multiple sequential connections over the same SOCKS5 listener
-"""
+#   End-to-end data flow  (requires both PT processes + mock ORPort)
+#     client -> server direction: data sent via SOCKS5 arrives plain at mock ORPort
+#     server -> client direction: data from mock ORPort arrives plain at SOCKS5 client
+#     bidirectional simultaneous transfer
+#     multiple sequential connections over the same SOCKS5 listener
 
 import os
 import queue
@@ -42,7 +40,7 @@ PT_DIR = Path(__file__).parent.resolve()
 TARGET_TRANSPORT = None
 
 def _free_port() -> int:
-    """Return an unused TCP port on 127.0.0.1."""
+    # Return an unused TCP port on 127.0.0.1
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         s.bind(('127.0.0.1', 0))
         return s.getsockname()[1]
@@ -174,14 +172,9 @@ def launch_client(transport: str) -> PTProcess:
     return PTProcess(['main.py'], env)
 
 class MockORPort:
-    """
-    A trivial TCP echo server that collects received bytes and lets the test
-    inspect / control what gets sent back.
-
-    ``received`` accumulates every byte the server reads across all connections.
-    ``send_queue`` lets the test inject bytes to send back on the next
-    accepted connection.
-    """
+    # A trivial TCP echo server that collects received bytes and lets the test inspect / control what gets sent back
+    # 'received' accumulates every byte the server reads across all connections
+    # 'send_queue' lets the test inject bytes to send back on the next accepted connection
 
     def __init__(self):
         self.received: bytes = b''
@@ -315,7 +308,7 @@ def _recv_exact(sock: socket.socket, n: int) -> bytes:
 
 
 def _recv_at_least(sock: socket.socket, n: int, timeout: float = 5.0) -> bytes:
-    """Receive until at least n bytes accumulated or timeout."""
+    # Receive until at least n bytes accumulated or timeout
     sock.settimeout(timeout)
     buf = b''
     deadline = time.monotonic() + timeout
@@ -330,7 +323,7 @@ def _recv_at_least(sock: socket.socket, n: int, timeout: float = 5.0) -> bytes:
     return buf
 
 class TestTransportUnit(unittest.TestCase):
-    """Pure in-process unit tests for the transport codec."""
+    # Pure in-process unit tests for the transport codec
 
     def setUp(self):
         # Import fresh so registry is populated
@@ -384,7 +377,7 @@ class TestIPCServer(unittest.TestCase):
             self.assertTrue(line.startswith('VERSION '), line)
 
     def test_smethod_line_format(self):
-        """SMETHOD <transport> <host>:<port>"""
+        # SMETHOD <transport> <host>:<port>
         with MockORPort() as orp, launch_server(TARGET_TRANSPORT, orp.addr) as pt:
             line = pt.wait_for_line(f'SMETHOD {TARGET_TRANSPORT} ')
             parts = line.split()
@@ -422,10 +415,8 @@ class TestIPCServer(unittest.TestCase):
                                      f"unexpected error line: {line!r}")
 
     def test_unknown_transport_silently_skipped(self):
-        """
-        'Unknown transports in the -transport or -transports flag are ignored entirely, and MUST NOT result in a "CMETHOD-ERROR" message. Thus it is entirely possible for a given PT proxy to immediately output "CMETHODS DONE" without outputting any "CMETHOD" or "CMETHOD-ERROR" lines. This does not result in termination of the PT process.' Source: PT specification Dispatcher IPC Interface v3.0 §1.2.2.1
-        SMETHODS DONE is still emitted.
-        """
+        # 'Unknown transports in the -transport or -transports flag are ignored entirely, and MUST NOT result in a "CMETHOD-ERROR" message. Thus it is entirely possible for a given PT proxy to immediately output "CMETHODS DONE" without outputting any "CMETHOD" or "CMETHOD-ERROR" lines. This does not result in termination of the PT process.' Source: PT specification document "Dispatcher IPC Interface", version 3.0, section 1.2.2.1
+        # SMETHODS DONE is still emitted
         with MockORPort() as orp, launch_server('does_not_exist', orp.addr) as pt:
             pt.wait_for_line('SMETHODS DONE')
             lines = pt.all_stdout()
@@ -434,7 +425,7 @@ class TestIPCServer(unittest.TestCase):
                                  f"spec violation - unknown transport produced error: {line!r}")
 
     def test_missing_orport_emits_env_error(self):
-        """Server mode without an ORPort must emit ENV-ERROR and exit non-zero."""
+        # Server mode without an ORPort must emit ENV-ERROR and exit non-zero
         env = {
             'TOR_PT_MANAGED_TRANSPORT_VER': '1',
             'TOR_PT_SERVER_TRANSPORTS': TARGET_TRANSPORT,
@@ -447,7 +438,7 @@ class TestIPCServer(unittest.TestCase):
         self.assertNotEqual(code, 0, "process should exit non-zero after ENV-ERROR")
 
     def test_bind_to_specific_port(self):
-        """-bindaddr / TOR_PT_SERVER_BINDADDR should be honoured."""
+        # -bindaddr / TOR_PT_SERVER_BINDADDR should be honoured
         port = _free_port()
         with MockORPort() as orp:
             bind_addr = f'127.0.0.1:{port}'
@@ -466,7 +457,7 @@ class TestIPCClient(unittest.TestCase):
             self.assertTrue(line.startswith('VERSION '), line)
 
     def test_cmethod_line_format(self):
-        """CMETHOD <transport> socks5 <host>:<port>"""
+        # CMETHOD <transport> socks5 <host>:<port>
         with launch_client(TARGET_TRANSPORT) as pt:
             line = pt.wait_for_line(f'CMETHOD {TARGET_TRANSPORT} ')
             parts = line.split()
@@ -478,7 +469,7 @@ class TestIPCClient(unittest.TestCase):
             self.assertGreater(int(port_str), 0)
 
     def test_cmethod_binds_to_loopback(self):
-        """Client listeners must bind to 127.0.0.1 per spec."""
+        # Client listeners must bind to 127.0.0.1 per spec
         with launch_client(TARGET_TRANSPORT) as pt:
             line = pt.wait_for_line(f'CMETHOD {TARGET_TRANSPORT} socks5 ')
             addr = line.split()[3]
@@ -522,10 +513,7 @@ class TestIPCClient(unittest.TestCase):
                                  f"spec violation: {line!r}")
 
     def test_multiple_transports_one_unknown(self):
-        """
-        When multiple transports are requested and one is unknown, the known
-        one gets a CMETHOD line and the unknown one is silently skipped.
-        """
+        # When multiple transports are requested and one is unknown, the known one gets a CMETHOD line and the unknown one is silently skipped
         env = {
             'TOR_PT_MANAGED_TRANSPORT_VER': '1',
             'TOR_PT_CLIENT_TRANSPORTS': f'{TARGET_TRANSPORT},does_not_exist',
@@ -561,7 +549,7 @@ class TestLifecycle(unittest.TestCase):
                       f"unexpected exit code after SIGTERM: {code}")
 
     def test_client_stdin_eof_clean_exit(self):
-        """Closing stdin (simulating Tor shutdown) must cause the PT to exit."""
+        # Closing stdin (simulating Tor shutdown) must cause the PT to exit
         pt = launch_client(TARGET_TRANSPORT)
         pt.wait_for_line('CMETHODS DONE')
         pt.close_stdin()
@@ -579,10 +567,7 @@ class TestLifecycle(unittest.TestCase):
                           f"unexpected exit code after stdin EOF: {code}")
 
     def test_no_stderr_output_on_clean_run(self):
-        """
-        With default log level (WARNING) there should be no stderr output
-        during a normal startup + SIGTERM sequence.
-        """
+        # With default log level (WARNING) there should be no stderr output during a normal startup + SIGTERM sequence
         with MockORPort() as orp:
             pt = launch_server(TARGET_TRANSPORT, orp.addr)
             pt.wait_for_line('SMETHODS DONE')
@@ -602,12 +587,9 @@ class TestLifecycle(unittest.TestCase):
 
 
 class TestEndToEnd(unittest.TestCase):
-    """
-    Full stack: MockORPort ← PT server ← (wire) ← PT client ← SOCKS5 client
-
-    Test fixture starts both PT processes and a mock ORPort, waits for all
-    IPC DONE lines, then runs individual data-flow assertions.
-    """
+    # Full stack: MockORPort ← PT server ← (wire) ← PT client ← SOCKS5 client
+    # Test fixture starts both PT processes and a mock ORPort, waits for all
+    # IPC DONE lines, then runs individual data-flow assertions
 
     @classmethod
     def setUpClass(cls):
@@ -641,7 +623,7 @@ class TestEndToEnd(unittest.TestCase):
             cls.orp.stop()
 
     def _connect(self) -> socket.socket:
-        """Open a fresh SOCKS5 connection through the PT client to the PT server."""
+        # Open a fresh SOCKS5 connection through the PT client to the PT server
         return socks5_connect(
             self.socks5_addr,
             self.bridge_host,
@@ -649,9 +631,7 @@ class TestEndToEnd(unittest.TestCase):
         )
 
     def test_client_to_server_data_arrives_at_orport(self):
-        """
-        Bytes sent by the SOCKS5 client must arrive plaintext at the mock ORPort.
-        """
+        # Bytes sent by the SOCKS5 client must arrive plaintext at the mock ORPort
         payload = b'Hello, ORPort!'
         # Snapshot how many bytes the ORPort already holds from earlier tests
         offset = len(self.orp.received)
@@ -665,11 +645,8 @@ class TestEndToEnd(unittest.TestCase):
             sock.close()
 
     def test_server_to_client_data_arrives_at_socks5_client(self):
-        """
-        Bytes sent by the mock ORPort must arrive plaintext at the SOCKS5 client.
-        The mock ORPort echoes everything it receives, so we send from the client
-        and verify we get the same bytes back.
-        """
+        # Bytes sent by the mock ORPort must arrive plaintext at the SOCKS5 client
+        # The mock ORPort echoes everything it receives, so we send from the client and verify we get the same bytes back
         payload = b'Ping!'
         sock = self._connect()
         try:
@@ -681,7 +658,7 @@ class TestEndToEnd(unittest.TestCase):
             sock.close()
 
     def test_bidirectional_roundtrip(self):
-        """Larger payload survives the full encode->wire->decode->ORPort->encode->wire->decode chain."""
+        # Larger payload survives the full encode->wire->decode->ORPort->encode->wire->decode chain
         import os
         payload = os.urandom(256)
         sock = self._connect()
@@ -694,7 +671,7 @@ class TestEndToEnd(unittest.TestCase):
             sock.close()
 
     def test_multiple_sequential_connections(self):
-        """Each connection is independent; the transport must stay alive between them."""
+        # Each connection is independent; the transport must stay alive between them
         for i in range(3):
             with self.subTest(connection=i):
                 msg = f'connection {i}'.encode()
@@ -707,10 +684,7 @@ class TestEndToEnd(unittest.TestCase):
                     sock.close()
 
     def test_empty_payload_does_not_crash(self):
-        """
-        Opening a SOCKS5 connection and immediately closing it must not
-        crash either PT process.
-        """
+        # Opening a SOCKS5 connection and immediately closing it must not crash either PT process
         sock = self._connect()
         sock.close()
         time.sleep(0.3)
@@ -720,9 +694,7 @@ class TestEndToEnd(unittest.TestCase):
                           "PT server crashed after empty connection")
 
     def test_ipc_lines_valid_after_connections(self):
-        """
-        After data flows, re-inspect stdout: no error lines should have appeared.
-        """
+        # After data flows, re-inspect stdout: no error lines should have appeared
         # Do one roundtrip to ensure some traffic has occurred
         sock = self._connect()
         sock.sendall(b'check')
