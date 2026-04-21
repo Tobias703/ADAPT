@@ -1,5 +1,7 @@
 # torrc configuration for a PT-bridge
 
+This page provides a working example for a torrc configuration regarding a PT-bridge. Each of the options has an explanation
+
 ```yaml
 # The "pt bridge" refers to the instance of Tor defined here; the "pt bridge binary" refers to the binary that actually contains the pt
 
@@ -17,9 +19,9 @@ BridgeRelay 1 # Yes, we are a bridge
 
 # Set up Networking
 Address 100.0.0.10 # Hello, I'm the pt-bridge
-ORPort 9111 IPv4Only # Onion Routing port, negotiates with pt bridge binary
+ORPort 9111 IPv4Only # Onion Routing port, pumps raw data to and from pt bridge binary
 DirPort 9112
-ExtORPort 100.0.0.10:9051 # Extended Onion routing, control channel to talk to pt bridge binary
+ExtORPort 100.0.0.10:9051 # Extended Onion routing, control channel to talk to pt bridge binary. THis is optional, since this communication has a fallback to the ORPort
 SocksPort 0 # Disable SocksPort as this should not be used as a non-pt bridge
 
 # Contact info so Tor does not complain

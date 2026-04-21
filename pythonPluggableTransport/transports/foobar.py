@@ -2,18 +2,16 @@
 #   Encoding:
 #     Each input bit is expanded to 3 output bytes (1:24 expansion).
 #     For every bit of the input byte, MSB-first:
-#       bit == 1  ->  b'foo'   (3 bytes)
-#       bit == 0  ->  b'bar'   (3 bytes)
+#       bit == 1 -> b'foo' (3 bytes)
+#       bit == 0 -> b'bar' (3 bytes)
 
-#   Example (byte 0xAB = 0b10101011):
+#   Example 0xAB = 10101011:
 #     1->foo  0->bar  1->foo  0->bar  1->foo  0->bar  1->foo  1->foo
-#     wire: b'foobarfoobarfoobarfoofoo'  (24 bytes)
+#     wire: b'foobarfoobarfoobarfoofoo' (24 bytes)
 
 #   Decoding:
 #     Consume the buffer in 24-byte chunks.  Each chunk maps back to one byte.
 #     Any trailing bytes that don't form a complete 24-byte chunk are buffered as the remainder for the next call.
-
-#     Corrupted tokens (neither b'foo' nor b'bar') are treated as 0-bits and do NOT raise - this keeps the relay alive for debugging and tolerates any unexpected framing artefacts.  A WARNING is logged so the problem is still visible.
 
 import logging
 from typing import Tuple
@@ -44,19 +42,17 @@ _ENCODE_TABLE = _build_encode_table()
 # Unknown tokens are treated as 0 via dict.get(token, 0) - never raise.
 _TOKEN_TO_BIT = {b"foo": 1, b"bar": 0}
 
-# Bytes per encoded byte on the wire
-# 8 bits * 3 bytes
-_FRAME_SIZE = 24
+_FRAME_BITS = 8
+_FRAME_BYTES = 3
+_FRAME_SIZE = _FRAME_BITS * _FRAME_BYTES
 
 
 @register
 class FoobarTransport(BaseTransport):
-    # Demo transport: replaces every binary 1 with 'foo' and every binary 0 with 'bar', operating at the individual bit level.
-    # Stateless - the same instance can be reused across calls, but the relay engine creates a fresh instance per connection anyway.
+    # Stateless Transport - the same instance can be reused across calls, but the relay engine creates a fresh instance per connection anyway.
 
     name = "foobar"
 
-    # encode
     def encode(self, data: bytes) -> bytes:
         # O(n) encoding via pre-computed lookup table.
         # Output length == len(data) * 24.
@@ -64,7 +60,6 @@ class FoobarTransport(BaseTransport):
             return b""
         return b"".join(_ENCODE_TABLE[b] for b in data)
 
-    # decode
     def decode(self, buf: bytes) -> Tuple[bytes, bytes]:
         # Decode as many complete 24-byte frames as possible from buf.
 
@@ -84,7 +79,7 @@ class FoobarTransport(BaseTransport):
             base = frame_idx * _FRAME_SIZE
             byte_val = 0
             for bit_idx in range(8):
-                token = buf[base + bit_idx * 3 : base + bit_idx * 3 + 3]
+                token = buf[base + bit_idx * _FRAME_BYTES : base + bit_idx * _FRAME_BYTES + _FRAME_BYTES]
                 bit = _TOKEN_TO_BIT.get(token)
                 if bit is None:
                     log.warning(

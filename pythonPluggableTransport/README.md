@@ -138,7 +138,7 @@ from transport import BaseTransport, register
 class MyTransport(BaseTransport):
     # XOR every byte with a fixed key - simple demo
 
-    name = "mytransport"          # ← wire name used in torrc / IPC
+    name = "mytransport"          # <- wire name used in torrc / IPC
     KEY  = 0x42
 
     def encode(self, data: bytes) -> bytes:

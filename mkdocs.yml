@@ -27,12 +27,10 @@ markdown_extensions:
 nav:
   - Index: index.md
   - Basics:
-    - Basics and General Information: ./basics/basics.md
-    - Running a Pluggable Transport: ./basics/running-a-pt.md
-  - Deployment-Independent:
-    - Deployment-Independent Information: ./deployment-independent/deployment-independent.md
-    - Client torrc: ./deployment-independent/torrc-client.md
-    - Bridge torrc: ./deployment-independent/torrc-bridge.md
+    - Basics and General Information: ./general/general.md
+    - Running a Pluggable Transport: ./general/running-a-pt.md
+    - Client torrc: ./general/torrc-client.md
+    - Bridge torrc: ./general/torrc-bridge.md
   - Shadow Network Simulator:
     - What is Shadow?: ./shadow/shadow.md
     - Getting started: ./shadow/getting-started.md
@@ -42,3 +40,5 @@ nav:
   - Docker Deployment:
     - Docker Deployment: ./docker/docker.md
     - docker-compose.yml: ./docker/docker-compose.yml.md
+  - Python Pluggable Transport:
+    - What is the Python Pluggable Transport?: ./ppt/ppt.md
