@@ -19,10 +19,10 @@ import sys
 import io
 from typing import cast
 
-from config import parse_config, IMPLEMENTATION_NAME, IMPLEMENTATION_VERSION
-from pt_client import run_client
-from pt_server import run_server
-import ipc
+from helpers.config import parse_config, IMPLEMENTATION_NAME, IMPLEMENTATION_VERSION
+from helpers.pt_client import run_client
+from helpers.pt_server import run_server
+import helpers.ipc as ipc
 
 # Register all bundled transports so that their @register decorators fire
 import transports  # noqa: F401

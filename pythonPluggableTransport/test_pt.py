@@ -338,7 +338,7 @@ class TestTransportUnit(unittest.TestCase):
         # Import fresh so registry is populated
         sys.path.insert(0, str(PT_DIR))
         import transports  # noqa: F401
-        from transport import create
+        from helpers.transport import create
 
         if not TARGET_TRANSPORT:
             self.skipTest(

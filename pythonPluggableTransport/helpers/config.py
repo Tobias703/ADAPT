@@ -10,7 +10,7 @@ import sys
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
 
-import ipc
+import helpers.ipc as ipc
 
 # Versions this implementation supports, in preference order.
 # Tor sends "1" (not "1.0") for PT spec v1; PT 3.0 sends "3.0".

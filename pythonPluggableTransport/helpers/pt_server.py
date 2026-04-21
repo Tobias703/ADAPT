@@ -8,10 +8,10 @@
 import asyncio
 import logging
 
-import ipc
-import relay as relay_mod
-import transport as transport_mod
-from config import PTConfig
+import helpers.ipc as ipc
+import helpers.relay as relay_mod
+import helpers.transport as transport_mod
+from helpers.config import PTConfig
 
 log = logging.getLogger(__name__)
 

@@ -8,11 +8,11 @@ import asyncio
 import logging
 
 
-import ipc
-import socks5
-import relay as relay_mod
-import transport as transport_mod
-from config import PTConfig
+import helpers.ipc as ipc
+import helpers.socks5 as socks5
+import helpers.relay as relay_mod
+import helpers.transport as transport_mod
+from helpers.config import PTConfig
 
 log = logging.getLogger(__name__)
 
