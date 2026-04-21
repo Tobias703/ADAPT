@@ -6,19 +6,19 @@
 #     empty-input contract  encode(b'') == b''  decode(b'') == (b'', b'')
 
 #   IPC stdout (PT spec compliance)
-#     server mode: VERSION; SMETHOD <name>; SMETHODS DONE emitted in order
+#     bridge mode: VERSION; SMETHOD <name>; SMETHODS DONE emitted in order
 #     client mode: VERSION; CMETHOD <name>; socks5 <addr>; CMETHODS DONE in order
 #     no error lines (ENV-ERROR / VERSION-ERROR / CMETHOD-ERROR / SMETHOD-ERROR)
 #     unknown transport silently skipped - no *-ERROR line, DONE still emitted
-#     missing ORPort in server mode -> ENV-ERROR and non-zero exit
+#     missing ORPort in bridge mode -> ENV-ERROR and non-zero exit
 
 #   Lifecycle
 #     SIGTERM -> clean exit (code 0 or -SIGTERM)
 #     stdin EOF -> clean exit
 
 #   End-to-end data flow  (requires both PT processes + mock ORPort)
-#     client -> server direction: data sent via SOCKS5 arrives plain at mock ORPort
-#     server -> client direction: data from mock ORPort arrives plain at SOCKS5 client
+#     client -> bridge direction: data sent via SOCKS5 arrives plain at mock ORPort
+#     bridge -> client direction: data from mock ORPort arrives plain at SOCKS5 client
 #     bidirectional simultaneous transfer
 #     multiple sequential connections over the same SOCKS5 listener
 
@@ -153,7 +153,7 @@ def _state_dir() -> str:
     return tempfile.mkdtemp(prefix="pt_state_")
 
 
-def launch_server(
+def launch_bridge(
     transport: str, or_addr: str, bind_addr: str | None = None
 ) -> PTProcess:
     env = {
@@ -383,15 +383,15 @@ class TestTransportUnit(unittest.TestCase):
         self.assertEqual(rem, b"")
 
 
-class TestIPCServer(unittest.TestCase):
+class TestIPCBridge(unittest.TestCase):
     def test_version_line_emitted(self):
-        with MockORPort() as orp, launch_server(TARGET_TRANSPORT, orp.addr) as pt:
+        with MockORPort() as orp, launch_bridge(TARGET_TRANSPORT, orp.addr) as pt:
             line = pt.wait_for_line("VERSION")
             self.assertTrue(line.startswith("VERSION "), line)
 
     def test_smethod_line_format(self):
         # SMETHOD <transport> <host>:<port>
-        with MockORPort() as orp, launch_server(TARGET_TRANSPORT, orp.addr) as pt:
+        with MockORPort() as orp, launch_bridge(TARGET_TRANSPORT, orp.addr) as pt:
             line = pt.wait_for_line(f"SMETHOD {TARGET_TRANSPORT} ")
             parts = line.split()
             self.assertEqual(parts[0], "SMETHOD")
@@ -401,11 +401,11 @@ class TestIPCServer(unittest.TestCase):
             self.assertGreater(int(port_str), 0)
 
     def test_smethods_done_emitted(self):
-        with MockORPort() as orp, launch_server(TARGET_TRANSPORT, orp.addr) as pt:
+        with MockORPort() as orp, launch_bridge(TARGET_TRANSPORT, orp.addr) as pt:
             pt.wait_for_line("SMETHODS DONE")
 
     def test_ipc_order_version_before_smethod_before_done(self):
-        with MockORPort() as orp, launch_server(TARGET_TRANSPORT, orp.addr) as pt:
+        with MockORPort() as orp, launch_bridge(TARGET_TRANSPORT, orp.addr) as pt:
             pt.wait_for_line("SMETHODS DONE")
             lines = pt.all_stdout()
             keywords = [line.split()[0] for line in lines if line.strip()]
@@ -419,7 +419,7 @@ class TestIPCServer(unittest.TestCase):
             self.assertLess(si, di, "SMETHOD must precede SMETHODS DONE")
 
     def test_no_error_lines_on_valid_config(self):
-        with MockORPort() as orp, launch_server(TARGET_TRANSPORT, orp.addr) as pt:
+        with MockORPort() as orp, launch_bridge(TARGET_TRANSPORT, orp.addr) as pt:
             pt.wait_for_line("SMETHODS DONE")
             lines = pt.all_stdout()
             for line in lines:
@@ -431,7 +431,7 @@ class TestIPCServer(unittest.TestCase):
     def test_unknown_transport_silently_skipped(self):
         # 'Unknown transports in the -transport or -transports flag are ignored entirely, and MUST NOT result in a "CMETHOD-ERROR" message. Thus it is entirely possible for a given PT proxy to immediately output "CMETHODS DONE" without outputting any "CMETHOD" or "CMETHOD-ERROR" lines. This does not result in termination of the PT process.' Source: PT specification document "Dispatcher IPC Interface", version 3.0, section 1.2.2.1
         # SMETHODS DONE is still emitted
-        with MockORPort() as orp, launch_server("does_not_exist", orp.addr) as pt:
+        with MockORPort() as orp, launch_bridge("does_not_exist", orp.addr) as pt:
             pt.wait_for_line("SMETHODS DONE")
             lines = pt.all_stdout()
             for line in lines:
@@ -441,7 +441,7 @@ class TestIPCServer(unittest.TestCase):
                 )
 
     def test_missing_orport_emits_env_error(self):
-        # Server mode without an ORPort must emit ENV-ERROR and exit non-zero
+        # Bridge mode without an ORPort must emit ENV-ERROR and exit non-zero
         env = {
             "TOR_PT_MANAGED_TRANSPORT_VER": "1",
             "TOR_PT_SERVER_TRANSPORTS": TARGET_TRANSPORT,
@@ -458,12 +458,12 @@ class TestIPCServer(unittest.TestCase):
         port = _free_port()
         with MockORPort() as orp:
             bind_addr = f"127.0.0.1:{port}"
-            with launch_server(TARGET_TRANSPORT, orp.addr, bind_addr=bind_addr) as pt:
+            with launch_bridge(TARGET_TRANSPORT, orp.addr, bind_addr=bind_addr) as pt:
                 line = pt.wait_for_line(f"SMETHOD {TARGET_TRANSPORT} ")
                 _, _, addr_part = line.split(None, 2)
                 reported_port = int(addr_part.split(":")[1])
                 self.assertEqual(
-                    reported_port, port, f"PT server bound to wrong port: {line!r}"
+                    reported_port, port, f"PT bridge bound to wrong port: {line!r}"
                 )
 
 
@@ -554,9 +554,9 @@ class TestIPCClient(unittest.TestCase):
 
 
 class TestLifecycle(unittest.TestCase):
-    def test_server_sigterm_clean_exit(self):
+    def test_bridge_sigterm_clean_exit(self):
         with MockORPort() as orp:
-            pt = launch_server(TARGET_TRANSPORT, orp.addr)
+            pt = launch_bridge(TARGET_TRANSPORT, orp.addr)
             pt.wait_for_line("SMETHODS DONE")
             code = pt.terminate(wait=5.0)
             # Accept 0 (clean) or negative SIGTERM value
@@ -584,9 +584,9 @@ class TestLifecycle(unittest.TestCase):
             code, (0, -signal.SIGTERM), f"unexpected exit code after stdin EOF: {code}"
         )
 
-    def test_server_stdin_eof_clean_exit(self):
+    def test_bridge_stdin_eof_clean_exit(self):
         with MockORPort() as orp:
-            pt = launch_server(TARGET_TRANSPORT, orp.addr)
+            pt = launch_bridge(TARGET_TRANSPORT, orp.addr)
             pt.wait_for_line("SMETHODS DONE")
             pt.close_stdin()
             code = pt.wait(timeout=8.0)
@@ -599,7 +599,7 @@ class TestLifecycle(unittest.TestCase):
     def test_no_stderr_output_on_clean_run(self):
         # With default log level (WARNING) there should be no stderr output during a normal startup + SIGTERM sequence
         with MockORPort() as orp:
-            pt = launch_server(TARGET_TRANSPORT, orp.addr)
+            pt = launch_bridge(TARGET_TRANSPORT, orp.addr)
             pt.wait_for_line("SMETHODS DONE")
             pt.terminate()
             # Read stderr; give the process a moment to flush
@@ -619,7 +619,7 @@ class TestLifecycle(unittest.TestCase):
 
 
 class TestEndToEnd(unittest.TestCase):
-    # Full stack: MockORPort ← PT server ← (wire) ← PT client ← SOCKS5 client
+    # Full stack: MockORPort <- PT bridge <- (wire) <- PT client <- SOCKS5 client
     # Test fixture starts both PT processes and a mock ORPort, waits for all
     # IPC DONE lines, then runs individual data-flow assertions
 
@@ -632,11 +632,11 @@ class TestEndToEnd(unittest.TestCase):
 
         cls.orp = MockORPort()
 
-        cls.pt_server = launch_server(TARGET_TRANSPORT, cls.orp.addr)
-        smethod_line = cls.pt_server.wait_for_line(f"SMETHOD {TARGET_TRANSPORT} ")
+        cls.pt_bridge = launch_bridge(TARGET_TRANSPORT, cls.orp.addr)
+        smethod_line = cls.pt_bridge.wait_for_line(f"SMETHOD {TARGET_TRANSPORT} ")
         # parse "SMETHOD <name> host:port"
-        cls.bridge_addr = smethod_line.split()[2]  # host:port the PT server listens on
-        cls.pt_server.wait_for_line("SMETHODS DONE")
+        cls.bridge_addr = smethod_line.split()[2]  # host:port the PT bridge listens on
+        cls.pt_bridge.wait_for_line("SMETHODS DONE")
 
         cls.pt_client = launch_client(TARGET_TRANSPORT)
         cmethod_line = cls.pt_client.wait_for_line(
@@ -653,20 +653,20 @@ class TestEndToEnd(unittest.TestCase):
     def tearDownClass(cls):
         if hasattr(cls, "pt_client"):
             cls.pt_client.terminate()
-        if hasattr(cls, "pt_server"):
-            cls.pt_server.terminate()
+        if hasattr(cls, "pt_bridge"):
+            cls.pt_bridge.terminate()
         if hasattr(cls, "orp"):
             cls.orp.stop()
 
     def _connect(self) -> socket.socket:
-        # Open a fresh SOCKS5 connection through the PT client to the PT server
+        # Open a fresh SOCKS5 connection through the PT client to the PT bridge
         return socks5_connect(
             self.socks5_addr,
             self.bridge_host,
             self.bridge_port,
         )
 
-    def test_client_to_server_data_arrives_at_orport(self):
+    def test_client_to_bridge_data_arrives_at_orport(self):
         # Bytes sent by the SOCKS5 client must arrive plaintext at the mock ORPort
         payload = b"Hello, ORPort!"
         # Snapshot how many bytes the ORPort already holds from earlier tests
@@ -681,7 +681,7 @@ class TestEndToEnd(unittest.TestCase):
         finally:
             sock.close()
 
-    def test_server_to_client_data_arrives_at_socks5_client(self):
+    def test_bridge_to_client_data_arrives_at_socks5_client(self):
         # Bytes sent by the mock ORPort must arrive plaintext at the SOCKS5 client
         # The mock ORPort echoes everything it receives, so we send from the client and verify we get the same bytes back
         payload = b"Ping!"
@@ -730,7 +730,7 @@ class TestEndToEnd(unittest.TestCase):
             self.pt_client.proc.poll(), "PT client crashed after empty connection"
         )
         self.assertIsNone(
-            self.pt_server.proc.poll(), "PT server crashed after empty connection"
+            self.pt_bridge.proc.poll(), "PT bridge crashed after empty connection"
         )
 
     def test_ipc_lines_valid_after_connections(self):
@@ -742,7 +742,7 @@ class TestEndToEnd(unittest.TestCase):
         sock.close()
         time.sleep(0.2)
 
-        for label, pt in (("client", self.pt_client), ("server", self.pt_server)):
+        for label, pt in (("client", self.pt_client), ("bridge", self.pt_bridge)):
             for line in pt.all_stdout():
                 for err in (
                     "ENV-ERROR",

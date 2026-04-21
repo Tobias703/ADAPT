@@ -25,9 +25,9 @@ async def _handle_connection(
     # Handle one inbound SOCKS5 connection from Tor.
     # Steps:
     #   1. Complete SOCKS5 handshake (supports method 0x00 and 0x09)
-    #   2. Open TCP connection to the PT server (host:port from SOCKS5 CONNECT)
+    #   2. Open TCP connection to the PT bridge (host:port from SOCKS5 CONNECT)
     #   3. Send SOCKS5 success reply to Tor
-    #   4. Bidirectional relay: encode Tor->server, decode server->Tor
+    #   4. Bidirectional relay: encode Tor->bridge, decode bridge->Tor
 
     peer = client_writer.get_extra_info("peername", ("?", 0))
     log.debug("[%s] client connection -> transport=%s", peer, transport_name)
@@ -40,12 +40,12 @@ async def _handle_connection(
     host, port, pt_args = result
     log.debug("[%s] SOCKS5 CONNECT %s:%d", peer, host, port)
 
-    # Connect to PT server
+    # Connect to PT bridge
     try:
         srv_reader, srv_writer = await asyncio.open_connection(host, port)
     except OSError as exc:
         log.warning(
-            "[%s] Cannot connect to PT server %s:%d - %s", peer, host, port, exc
+            "[%s] Cannot connect to PT bridge %s:%d - %s", peer, host, port, exc
         )
         await socks5.send_failure(client_writer, socks5.REP_CONN_REFUSED)
         return

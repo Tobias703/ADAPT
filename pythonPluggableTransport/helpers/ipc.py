@@ -69,9 +69,9 @@ def emit_cmethods_done() -> None:
     _emit("CMETHODS DONE")
 
 
-# Server messages
+# Bridge messages
 def emit_smethod(transport: str, addr: str, args: dict | None = None) -> None:
-    # A server-side transport listener is ready
+    # A bridge-side transport listener is ready
     # addr  = 'host:port' that PT clients should connect to
     # args  = optional per-transport key/value pairs forwarded in Bridge line
     line = f"SMETHOD {transport} {addr}"
@@ -86,12 +86,12 @@ def emit_smethod(transport: str, addr: str, args: dict | None = None) -> None:
 
 
 def emit_smethod_error(transport: str, msg: str) -> None:
-    # A server-side transport could not be started
+    # A bridge-side transport could not be started
     _emit(f"SMETHOD-ERROR {transport} {msg}")
 
 
 def emit_smethods_done() -> None:
-    # All server-side transports have been initialised (or skipped)
+    # All bridge-side transports have been initialised (or skipped)
     _emit("SMETHODS DONE")
 
 

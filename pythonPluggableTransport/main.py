@@ -21,7 +21,7 @@ from typing import cast
 
 from helpers.config import parse_config, IMPLEMENTATION_NAME, IMPLEMENTATION_VERSION
 from helpers.pt_client import run_client
-from helpers.pt_server import run_server
+from helpers.pt_bridge import run_bridge
 import helpers.ipc as ipc
 
 # Register all bundled transports so that their @register decorators fire
@@ -64,7 +64,7 @@ async def _async_main() -> None:
     if cfg.mode == "client":
         await run_client(cfg)
     else:
-        await run_server(cfg)
+        await run_bridge(cfg)
 
     # Wait for shutdown signal
     stop = asyncio.Event()

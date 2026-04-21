@@ -5,8 +5,8 @@
 # The JSON Parameter Block (method 0x09) lets the SOCKS5 client pass per-connection PT arguments (e.g. bridge fingerprint, options) inline in the SOCKS handshake.  It was specifically assigned by IANA for the PT spec.
 
 # Sub-negotiation for method 0x09:
-#   Client -> Server:  uint16-BE(len)  json-utf8(len bytes)
-#   Server -> Client:  0x01 0x00   (version=1, status=success)
+#   Client -> Bridge:  uint16-BE(len)  json-utf8(len bytes)
+#   Bridge -> Client:  0x01 0x00   (version=1, status=success)
 
 # Only CONNECT command is supported (no BIND or UDP ASSOCIATE).
 

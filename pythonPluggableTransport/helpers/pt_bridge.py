@@ -75,7 +75,7 @@ async def _handle_connection(
     log.debug("[%s] relay finished", peer)
 
 
-async def run_server(cfg: PTConfig) -> None:
+async def run_bridge(cfg: PTConfig) -> None:
     # Start one listener per requested transport and emit SMETHOD lines.
 
     # Parse OR port

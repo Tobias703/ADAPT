@@ -23,7 +23,7 @@ IMPLEMENTATION_VERSION = "1.0.0"
 
 @dataclass
 class PTConfig:
-    # 'client' | 'server'
+    # 'client' | 'bridge'
     mode: str
     # negotiated PT spec version string
     protocol_version: str
@@ -35,7 +35,7 @@ class PTConfig:
     # Client-only
     upstream_proxy: Optional[str] = None  # e.g. "socks5://127.0.0.1:9050"
 
-    # Server-only
+    # Bridge-only
     # "host:port" of ORPort
     or_port: Optional[str] = None
     # "host:port" of ExtORPort (optional)
@@ -43,7 +43,7 @@ class PTConfig:
     # name -> "host:port"
     bind_addrs: Dict[str, str] = field(default_factory=dict)
     # name -> "key=value;…"
-    server_options: Dict[str, str] = field(default_factory=dict)
+    bridge_options: Dict[str, str] = field(default_factory=dict)
     # Per-transport options (from -options / -optionsFile / TOR_PT_SERVER_TRANSPORT_OPTIONS)
     transport_options: Dict[str, dict] = field(default_factory=dict)
 
@@ -76,7 +76,7 @@ def _parse_bindaddr(raw: str) -> Dict[str, str]:
     return result
 
 
-def _parse_server_transport_options(raw: str) -> Dict[str, str]:
+def _parse_bridge_transport_options(raw: str) -> Dict[str, str]:
     # Parse TOR_PT_SERVER_TRANSPORT_OPTIONS.
     # Format: "transportName1:key1=value2,key2=value2;transportName2:key1=value1;…"
     # Colons, semicolons, and backslashes are backslash-escaped.
@@ -128,7 +128,7 @@ def parse_config() -> PTConfig:
         default=None,
         choices=[
             "client",
-            "server",
+            "bridge",
             "transparent-TCP",
             "STUN-aware-UDP",
             "transparent-UDP",
@@ -162,13 +162,13 @@ def parse_config() -> PTConfig:
         if os.environ.get("TOR_PT_CLIENT_TRANSPORTS"):
             mode = "client"
         elif os.environ.get("TOR_PT_SERVER_TRANSPORTS"):
-            mode = "server"
+            mode = "bridge"
         else:
             ipc.emit_env_error(
                 "Cannot determine mode: set -mode or TOR_PT_CLIENT/SERVER_TRANSPORTS"
             )
             sys.exit(1)
-    if mode not in ("client", "server"):
+    if mode not in ("client", "bridge"):
         ipc.emit_env_error(f"Mode '{mode}' is not supported by this implementation")
         sys.exit(1)
 
@@ -181,7 +181,7 @@ def parse_config() -> PTConfig:
             for t in os.environ["TOR_PT_CLIENT_TRANSPORTS"].split(",")
             if t.strip()
         ]
-    elif mode == "server" and os.environ.get("TOR_PT_SERVER_TRANSPORTS"):
+    elif mode == "bridge" and os.environ.get("TOR_PT_SERVER_TRANSPORTS"):
         transports = [
             t.strip()
             for t in os.environ["TOR_PT_SERVER_TRANSPORTS"].split(",")
@@ -203,11 +203,11 @@ def parse_config() -> PTConfig:
     if mode == "client":
         cfg.upstream_proxy = args.proxy or os.environ.get("TOR_PT_PROXY")
 
-    # 8. Server extras
-    if mode == "server":
+    # 8. Bridge extras
+    if mode == "bridge":
         or_port = args.orport or os.environ.get("TOR_PT_ORPORT")
         if not or_port:
-            ipc.emit_env_error("Server mode requires -orport / TOR_PT_ORPORT")
+            ipc.emit_env_error("Bridge mode requires -orport / TOR_PT_ORPORT")
             sys.exit(1)
         cfg.or_port = or_port
 
@@ -221,6 +221,6 @@ def parse_config() -> PTConfig:
 
         opts_raw = os.environ.get("TOR_PT_SERVER_TRANSPORT_OPTIONS", "")
         if opts_raw:
-            cfg.server_options = _parse_server_transport_options(opts_raw)
+            cfg.bridge_options = _parse_bridge_transport_options(opts_raw)
 
     return cfg

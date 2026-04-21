@@ -4,11 +4,11 @@
 #   B -decode> A (framed output; partial frames are buffered)
 
 # For the PT client:
-#   A = Tor side (SOCKS5 client), B = PT server side
-#   A->B: encode plaintext before sending to server
-#   B->A: decode ciphertext arriving from server
+#   A = Tor side (SOCKS5 client), B = PT bridge side
+#   A->B: encode plaintext before sending to bridge
+#   B->A: decode ciphertext arriving from bridge
 
-# For the PT server:
+# For the PT bridge:
 #   A = PT client side, B = ORPort side
 #   A->B: decode ciphertext arriving from PT client
 #   B->A: encode plaintext before sending back to PT client
@@ -125,7 +125,7 @@ async def relay(
     # Typical usage for PT client mode::
     #     await relay(tor_reader, tor_writer, srv_reader, srv_writer, a_to_b_fn=transport.encode,   a_to_b_is_decode=False, b_to_a_fn=transport.decode,   b_to_a_is_decode=True)
 
-    # Typical usage for PT server mode::
+    # Typical usage for PT bridge mode::
     #     await relay(client_reader, client_writer, or_reader, or_writer, a_to_b_fn=transport.decode, a_to_b_is_decode=True, b_to_a_fn=transport.encode, b_to_a_is_decode=False)
 
     pump_a_b = (
