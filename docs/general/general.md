@@ -2,7 +2,7 @@
 
 This page shows some general information that is needed to understand and successfully implement a Tor Pluggable Transport. It will start with the bare basics and build from there.
 
-## What is a Pluggable Transport and how does it work?
+## What is a Pluggable Transport?
 
 This chapter should give you a basic idea of what Pluggable Transports (PTs) are and how they work. The full Pluggable Transport Specification dives into a lot more details. Please note that we will be mainly using the Pluggable Transports Specification V1 in this Project. This is due to the fact, that Tor itself still uses version 1 of the PT spec and we are designing our PTs for use with Tor. It can be found here in full:
 

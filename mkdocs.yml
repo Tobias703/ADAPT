@@ -35,10 +35,12 @@ nav:
     - What is Shadow?: ./shadow/shadow.md
     - Getting started: ./shadow/getting-started.md
     - Configuring Shadow: ./shadow/configuration.md
-  - Local Deployment:
-    - Local Deployment: ./local/local.md
+  - Local Deployment: ./local/local.md
   - Docker Deployment:
     - Docker Deployment: ./docker/docker.md
     - docker-compose.yml: ./docker/docker-compose.yml.md
+    - dockerfile: ./docker/dockerfile.md
   - Python Pluggable Transport:
     - What is the Python Pluggable Transport?: ./ppt/ppt.md
+  - Contributing to the Documentation: ./documentation/contributing.md
+  - Future Work: ./future_work/future_work.md

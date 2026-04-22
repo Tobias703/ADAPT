@@ -28,9 +28,13 @@ Additional notes:
 - This project expects you to add shadow to your `PATH`, as is described in the installation instructions.
 - Once you are done installing shadow, you can test if your implementation is working by running the `run_shadow.sh` script within this project's `shadow` directory. If the simulation finishes without errors, you can assume shadow works.
 
+### Running shadow
+
+Running shadow after the installation is as easy as executing the `shadow_run.sh` script within the `shadow` directory. This script will try to remove the old simulation results by deleting the directory `shadow.data` and then run the simulation with the command `shadow --template-directory shadow.data.template shadow.yaml > shadow.log`. The newly generated `shadow.data` directory will hold the simulation results.
+
 ## Docker deployment
 
-For a Docker deployment, the user only has to have `Docker` and `Docker compose` installed. In the following, there will be explanations and quirks for each common type of operating system on how to get the Docker deployment to work and what to look out for. It is still strongly recommended to use Linux as some simple testing has shown that running the simulation on Linux took about 14 seconds while running it on the same hardware but on windwos took over a minute.
+For a Docker deployment, the user only has to have `Docker` and `Docker compose` installed. In the following, there will be explanations and quirks for each common type of operating system on how to get the Docker deployment to work and what to look out for. It is still strongly recommended to use Linux as some simple testing has shown that running the simulation on Linux took about 14 seconds while running it on the same hardware but on windwos took over a minute. Just like with the local deployment, the docker deployment will output the simulation results to the `shadow.data` directory.
 
 !!! note
     Independent of your operating system, the first launch of the container will take a very long time. This is due to the fact, that the container has to be built first. Running the container subsequent times, execution will be much quicker since docker stores the built image and only needs to run Shadow in the already built container.
