@@ -7,7 +7,7 @@ services:
   pt-bridge:
     build: 
       context: ../
-      dockerfile: docker/bridge/Dockerfile
+      dockerfile: docker_deployment/bridge/Dockerfile
     container_name: pt-bridge
     networks:
       tornet:
@@ -16,7 +16,7 @@ services:
   pt-client:
     build:
       context: ../
-      dockerfile: docker/client/Dockerfile
+      dockerfile: docker_deployment/client/Dockerfile
     container_name: pt-client
     networks:
       tornet:

@@ -28,3 +28,7 @@ pip install -r requirements.txt
 ## Creating new pages or changing the navigation
 
 The last important thing to know is the configuration for MKDocs. The config is located at the root of this Project, it's called `mkdocs.yaml`. In order to add additional pages to the documentation or edit the Navigation bar, this file has to be edited. It's a yaml file and should be self-explanatory. When in doubt, refer to the [MKDocs configuration documentation](https://www.mkdocs.org/user-guide/configuration/).
+
+## But how do I get my local changes into the github.io?
+
+The ci workflow in `.github/workflows/` automatically updates the github.io on every push. So to get your changes online, you'll just have to commit and push them!

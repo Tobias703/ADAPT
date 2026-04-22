@@ -15,10 +15,10 @@ USER toruser
 WORKDIR /app
 
 # Copy torrc + PT binary
-COPY docker/client/torrc /app/torrc # Get the torrc into the container's filesystem
+COPY docker_deployment/client/torrc /app/torrc # Get the torrc into the container's filesystem
 COPY --chown=toruser:toruser /shadow/lyrebird /usr/local/bin/lyrebird # Get lyrebird into the container's filesystem
 
 # Entrypoint handles the Tor invocation
-COPY docker/client/entrypoint.sh /entrypoint.sh # Copy a script that serves as the entrypoint for the container. The script sets up permissions and runs Tor as non-root
+COPY docker_deployment/client/entrypoint.sh /entrypoint.sh # Copy a script that serves as the entrypoint for the container. The script sets up permissions and runs Tor as non-root
 ENTRYPOINT ["/entrypoint.sh"]
 ```

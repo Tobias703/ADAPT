@@ -10,9 +10,9 @@ USER toruser
 WORKDIR /app
 
 # Copy torrc + PT binary
-COPY docker/client/torrc /app/torrc
+COPY docker_deployment/client/torrc /app/torrc
 COPY --chown=toruser:toruser /shadow/lyrebird /usr/local/bin/lyrebird
 
 # Entrypoint handles the Tor invocation
-COPY docker/client/entrypoint.sh /entrypoint.sh
+COPY docker_deployment/client/entrypoint.sh /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
