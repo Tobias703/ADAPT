@@ -6,7 +6,7 @@ UseBridges 1
 ClientTransportPlugin obfs4 exec ../../../lyrebird
 Bridge obfs4 100.0.0.10:1234 BCC0C43EBEF9309D93D5DA52EDBC6C1F3528319E cert=1p5Nwg21yKUnOb7oq258YAXmvNXfUVAzftNaS8zxL75Dx9hYcGHFHeS2AqGvhvC+9JX7bg iat-mode=0
 
-SocksPort 127.0.0.1:9052
+SocksPort 9052
 
 ConfluxEnabled 0
 

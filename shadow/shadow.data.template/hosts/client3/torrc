@@ -6,7 +6,7 @@ UseBridges 1
 ClientTransportPlugin foobar exec ../../../ppt
 Bridge foobar 100.0.0.10:1235
 
-SocksPort 127.0.0.1:9052
+SocksPort 9052
 
 ConfluxEnabled 0
 
