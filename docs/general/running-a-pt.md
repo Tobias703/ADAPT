@@ -1,4 +1,4 @@
-# Running a Pluggable Transport
+# Configuring and Running a Pluggable Transport
 
 In order to run a Pluggable Transport, one must first understand, how PTs are implemented and how they are called.
 
@@ -12,11 +12,15 @@ As already mentioned in the [General information](general.md), a PT communicates
 
 ### How to run it through Tor
 
-As described above, to run a pluggable transport through Tor, a valid configuration file has to be provided when Tor is called. The basic command is: `tor -f path-to-config` where the path to the config can either be a relative path from where the command is called, or an absolute path. The `config` file will from here on out be referred to as a `torrc`-file or just a `torrc`. The reason for that is, that if no configuration file is provided, Tor uses a file called `torrc` inside `/etc/tor/`. Documentation and examples list these files as having the word `torrc` in their titles for clarity. The same is done in this project. `torrc`-files do not have a file ending, have `torrc` as either their name or part of their name and are opened as textfiles for editing. They contain configuration for Tor to follow. For more details on `torrc`-files, refer to the [Deployment Independent Documentation](../general/general.md).
+As described above, to run a pluggable transport through Tor, a valid configuration file has to be provided when Tor is called. The basic command is: `tor -f path-to-config` where the path to the config can either be a relative path from where the command is called, or an absolute path. The `config` file will from here on out be referred to as a `torrc`-file or just a `torrc`. The reason for that is, that if no configuration file is provided, Tor uses a file called `torrc` inside `/etc/tor/`. Documentation and examples list these files as having the word `torrc` in their titles for clarity. The same is done in this project. `torrc`-files do not have a file ending, have `torrc` as either their name or part of their name and are opened as textfiles for editing. They contain configuration for Tor to follow. More details on `torrc`-files will follow in the next section.
 
 ## Configuring a Pluggable Transport
 
-As already mentioned, a Pluggable Transport is
+As already mentioned, a Pluggable Transport is configured via so-called 'torrc'-files. Sadly, when Tor migrated to its new website, [the documentation for torrc configs was not ported with it](https://forum.torproject.org/t/torrc-config-reference/7412). The old documentation, however, is still available and can be referenced here:
+
+<https://2019.www.torproject.org/docs/tor-manual.html.en>
+
+The following sections will provide concrete instructions on how to configure minimal PT-clients and PT-bridges. They will also include optional but recommended configuration options. For implementation-ready examples of client- and bridge-torrc files, refer to chapters [torrc-client](./torrc-client.md) and [torrc-bridge](./torrc-bridge.md) respectively.
 
 ### Running a PT-client (torrc-client)
 

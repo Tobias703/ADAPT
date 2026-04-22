@@ -28,7 +28,7 @@ nav:
   - Index: index.md
   - Basics:
     - Basics and General Information: ./general/general.md
-    - Running a Pluggable Transport: ./general/running-a-pt.md
+    - Configuring and Running a Pluggable Transport: ./general/running-a-pt.md
     - Client torrc: ./general/torrc-client.md
     - Bridge torrc: ./general/torrc-bridge.md
   - Shadow Network Simulator:
