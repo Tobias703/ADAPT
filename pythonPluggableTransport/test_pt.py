@@ -764,7 +764,7 @@ if __name__ == "__main__":
         "-t",
         "--transport",
         required=True,
-        help="Name of the pluggable transport to test (e.g. obfs4, webtunnel)",
+        help="Name of the pluggable transport to test (e.g. foobar, invert, etc.)",
     )
 
     args, remaining_argv = parser.parse_known_args()

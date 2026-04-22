@@ -50,7 +50,6 @@ docker_deployment/
 └── docker-compose.yml              # Compose file for easily starting the containers.
 docs/
 ├── index.md                        # Full documentation title page.
-├── setup_docs.sh                   # Setup script for when you want to change and deploy the docs locally. TODO: move to docs
 └── [Further Documentation]
 local_deployment/
 ├── bridge-torrc                    # Tor config for locally running the pluggable transport bridge.
