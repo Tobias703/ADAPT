@@ -1,6 +1,6 @@
 # torrc configuration for a PT-client
 
-This page provides a working example for a torrc configuration regarding a PT-client. Each of the options has an explanation. The full specification was never moved to the new Tor-website. The old website however, still holds the specification and can be referenced to get detailled descriptions as well as a list of all possible configuration options. It can be found here:
+This page provides a working example for a generic torrc configuration regarding a PT-client. Each of the options has an explanation. The full specification was never moved to the new Tor-website. The old website however, still holds the specification and can be referenced to get detailled descriptions as well as a list of all possible configuration options. It can be found here:
 
 <https://2019.www.torproject.org/docs/tor-manual.html.en>
 
