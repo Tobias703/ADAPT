@@ -5,10 +5,12 @@ DataDirectory ./ptbridge
 PublishServerDescriptor 0
 BridgeDistribution none
 
-ServerTransportPlugin obfs4 exec ../../../lyrebird
-ServerTransportPlugin foobar exec ../../../ppt
-ServerTransportListenAddr foobar 100.0.0.10:1235
+ServerTransportPlugin obfs3,obfs4 exec ../../../lyrebird
 ServerTransportListenAddr obfs4 100.0.0.10:1234
+# Here's some example config if you want to use obfs4 and the foobar transport instead of obfs4 and obfs3
+# ServerTransportPlugin obfs4 exec ../../../lyrebird
+# ServerTransportPlugin foobar exec ../../../ppt
+# ServerTransportListenAddr foobar 100.0.0.10:1235
 BridgeRelay 1
 
 Address 100.0.0.10

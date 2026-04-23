@@ -3,8 +3,11 @@
 DataDirectory ./ptclient
 
 UseBridges 1
-ClientTransportPlugin foobar exec ../../../ppt
-Bridge foobar 100.0.0.10:1235
+ClientTransportPlugin obfs3 exec ../../../lyrebird
+Bridge obfs3 100.0.0.10:1235
+# Here's some example config if you want to use the foobar transport instead of obfs3
+# ClientTransportPlugin foobar exec ../../../ppt
+# Bridge foobar 100.0.0.10:1235
 
 SocksPort 9052
 
